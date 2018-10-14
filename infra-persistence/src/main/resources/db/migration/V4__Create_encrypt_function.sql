@@ -1,0 +1,7 @@
+CREATE OR REPLACE FUNCTION encryptit(IN value VARCHAR(100))
+RETURNS VARCHAR AS $$
+DECLARE
+BEGIN
+ RETURN crypt(value, gen_salt('bf'));
+END;
+$$ LANGUAGE PLpgSQL;

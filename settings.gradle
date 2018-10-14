@@ -1,0 +1,8 @@
+rootProject.name = 'cheesekake'
+
+include "domain"
+include "app-api"
+include "app-impl"
+include "infra-persistence"
+include "infra-web"
+include "main"

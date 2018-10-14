@@ -1,0 +1,7 @@
+.idea
+.sessions
+.gradle
+**/.DS_Store
+**/generated
+**/out
+**/build

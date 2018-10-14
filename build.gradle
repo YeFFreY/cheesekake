@@ -1,0 +1,161 @@
+buildscript {
+    ext.kotlin_version = '1.2.71'
+
+    repositories {
+        jcenter()
+        maven { url "http://kotlin.bintray.com/ktor" }
+        maven { url "https://plugins.gradle.org/m2/" }
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'nu.studer:gradle-jooq-plugin:3.0.2'
+        classpath "gradle.plugin.com.boxfuse.client:gradle-plugin-publishing:5.2.0"
+        classpath 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2'
+    }
+}
+
+ext {
+    kotlin_version = '1.2.71'
+    ktor_version = '0.9.5'
+    jooq_version = '3.11.5'
+    postgres_version = '42.2.5'
+    arrow_version = '0.7.3'
+}
+
+allprojects {
+    group 'org.yeffrey'
+    version '1.0-SNAPSHOT'
+}
+
+
+subprojects {
+    apply plugin: "java"
+    apply plugin: "kotlin"
+
+    sourceCompatibility = 1.8
+
+    kotlin {
+        experimental {
+            coroutines 'enable'
+        }
+    }
+
+    repositories {
+        jcenter()
+        maven { url "http://kotlin.bintray.com/ktor" }
+        mavenCentral()
+    }
+
+    dependencies {
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
+        compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.30.2'
+        compile 'ch.qos.logback:logback-classic:1.2.3'
+        compile "io.arrow-kt:arrow-core:$arrow_version"
+        compile "io.arrow-kt:arrow-syntax:$arrow_version"
+        compile "io.arrow-kt:arrow-typeclasses:$arrow_version"
+        compile "io.arrow-kt:arrow-data:$arrow_version"
+        compile "io.arrow-kt:arrow-instances-core:$arrow_version"
+        compile "io.arrow-kt:arrow-instances-data:$arrow_version"
+
+        testCompile group: 'junit', name: 'junit', version: '4.12'
+    }
+
+}
+
+
+
+project(":main") {
+    apply plugin: 'application'
+
+    mainClassName = 'io.ktor.server.netty.DevelopmentEngine'
+    
+    dependencies {
+        compile 'org.koin:koin-ktor:1.0.1'
+        compile project(":domain")
+        compile project(":app-api")
+        compile project(":app-impl")
+        compile project(":infra-web")
+        compile project(":infra-persistence")
+    }
+}
+
+
+project(":domain") {
+
+}
+
+project(":app-api") {
+    dependencies {
+        compile project(":domain")
+    }
+}
+
+project(":app-impl") {
+    dependencies {
+        compile project(":app-api")
+        compile project(":domain")
+    }
+}
+
+project("infra-persistence") {
+    apply plugin: "nu.studer.jooq"
+    apply plugin: "org.flywaydb.flyway"
+
+    dependencies {
+        compile project(":domain")
+
+        compile "org.jooq:jooq:$jooq_version"
+        compile "org.jooq:jooq-meta:$jooq_version"
+        compile "org.jooq:jooq-codegen:$jooq_version"
+
+        compile "org.postgresql:postgresql:$postgres_version"
+        jooqRuntime "org.postgresql:postgresql:$postgres_version"
+        compile "com.zaxxer:HikariCP:2.7.8"
+
+    }
+
+
+    jooq {
+        version = '3.11.5'
+        edition = 'OSS'
+        app(sourceSets.main) {
+            jdbc {
+                driver = 'org.postgresql.Driver'
+                url = 'jdbc:postgresql:cheesecake_dev'
+                user = 'postgres'
+                password = 'postgres'
+            }
+            generator {
+                name = 'org.jooq.codegen.DefaultGenerator'
+                database {
+                    name = 'org.jooq.meta.postgres.PostgresDatabase'
+                    inputSchema = 'public'
+                }
+                target {
+                    packageName = 'org.yeffrey.cheesekake.persistence.db'
+                    directory = 'src/main/generated/java'
+                }
+            }
+        }
+    }
+
+    flyway {
+        url = 'jdbc:postgresql:cheesecake_dev'
+        user = 'postgres'
+        password = 'postgres'
+    }
+
+}
+
+project("infra-web") {
+    dependencies {
+        compile project(":app-api")
+
+        compile "io.ktor:ktor-server-netty:$ktor_version"
+        compile "io.ktor:ktor-jackson:$ktor_version"
+        compile "io.ktor:ktor-server-sessions:$ktor_version"
+
+    }
+}
