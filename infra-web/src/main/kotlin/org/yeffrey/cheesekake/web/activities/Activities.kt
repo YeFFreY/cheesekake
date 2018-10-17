@@ -18,7 +18,7 @@ fun Route.activities(createActivity: CreateActivity, queryActivities: QueryActiv
         }
         post {
             val input = call.receive<CreateActivityDto>()
-            createActivity.create(input.toRequest(), CreateActivityPresenter(call))
+            createActivity.create(input.toRequest(1), CreateActivityPresenter(call))
         }
     }
 }
