@@ -5,11 +5,7 @@ import org.yeffrey.cheesekake.domain.ValidationError
 
 interface UpdateActivitySummary {
     suspend fun update(request: Request, presenter: Presenter)
-    data class Request(val activityId: Int, val title: String, val summary: String): UseCaseRequest() {
-        override fun allow(/*authorId: Int*/) : Boolean {
-            return this.userId.nonEmpty() // Should I get the author as a parameter ???
-        }
-    }
+    data class Request(val activityId: Int, val title: String, val summary: String): UseCaseRequest()
     interface Presenter {
         suspend fun validationFailed(errors: List<ValidationError>)
         suspend fun success(id: Int)

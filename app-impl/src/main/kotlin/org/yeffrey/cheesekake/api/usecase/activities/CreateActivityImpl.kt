@@ -8,7 +8,6 @@ import org.yeffrey.cheesekake.domain.activities.command.activityTitle
 
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : CreateActivity {
     override suspend fun create(request: CreateActivity.Request, presenter: CreateActivity.Presenter) {
-        if(!request.allow()) presenter.accessDenied()
         val newActivity = request.toDomain()
         when (newActivity) {
              is Valid -> {
