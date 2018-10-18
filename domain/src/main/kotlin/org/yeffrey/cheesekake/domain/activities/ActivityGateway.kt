@@ -1,12 +1,12 @@
 package org.yeffrey.cheesekake.domain.activities
 
 import arrow.core.Option
-import org.yeffrey.cheesekake.domain.activities.command.NewActivity
-import org.yeffrey.cheesekake.domain.activities.command.UpdatedActivity
+import org.yeffrey.cheesekake.domain.activities.entities.Activity
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityId
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 
 interface CreateActivityGateway {
-    suspend fun create(activity: NewActivity): Int
+    suspend fun create(activity: Activity): ActivityId
 }
 
 interface QueryActivityGateway {
@@ -14,7 +14,6 @@ interface QueryActivityGateway {
 }
 
 interface UpdateActivitySummaryGateway {
-    suspend fun authorOf(activityId: Int): Int
-    suspend fun update(activity: UpdatedActivity): Int
+    suspend fun update(activity: Activity): ActivityId
 }
 data class ActivityQueryCriteria(val titleContains: Option<String>)

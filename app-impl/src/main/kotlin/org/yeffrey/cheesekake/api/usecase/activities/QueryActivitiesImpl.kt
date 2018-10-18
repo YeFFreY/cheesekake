@@ -6,7 +6,7 @@ import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 
 class QueryActivitiesImpl(private val activityGateway: QueryActivityGateway) : QueryActivities {
-    override suspend fun find(request: QueryActivities.Request, presenter: QueryActivities.Presenter) {
+    override suspend fun handle(request: QueryActivities.Request, presenter: QueryActivities.Presenter) {
         val result = activityGateway.query(ActivityQueryCriteria(request.titleContains.toOption()))
         presenter.success(result.map{ it.toPresenterModel() })
     }

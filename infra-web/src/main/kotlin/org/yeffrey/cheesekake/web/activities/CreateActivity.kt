@@ -17,7 +17,7 @@ fun CreateActivityDto.toRequest(userId: Int): CreateActivity.Request {
 
 class CreateActivityPresenter(private val call: ApplicationCall) : CreateActivity.Presenter {
     override suspend fun accessDenied() {
-        call.respond(HttpStatusCode.Unauthorized)
+        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "access denied"))
     }
 
     override suspend fun validationFailed(errors: List<ValidationError>) {

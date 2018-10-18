@@ -5,9 +5,9 @@ import arrow.core.Some
 import org.jooq.Condition
 import org.jooq.impl.DSL
 import org.yeffrey.cheesekake.domain.activities.ActivityQueryCriteria
-import org.yeffrey.cheesekake.domain.activities.command.NewActivity
 import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
+import org.yeffrey.cheesekake.domain.activities.entities.Activity
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
@@ -32,9 +32,9 @@ class ActivityGatewayImpl : CreateActivityGateway, QueryActivityGateway {
         return condition
     }
 
-    override suspend fun create(activity: NewActivity): Int = dbQuery {
+    override suspend fun create(activity: Activity): Int = dbQuery {
         it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
-                .values(activity.title.value, activity.summary)
+                .values(null, activity.summary)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }

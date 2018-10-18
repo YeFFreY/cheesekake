@@ -1,10 +1,11 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
+import arrow.core.toOption
 import arrow.data.*
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivitySummaryGateway
-import org.yeffrey.cheesekake.domain.activities.command.UpdatedActivity
-import org.yeffrey.cheesekake.domain.activities.command.activityTitle
+import org.yeffrey.cheesekake.domain.activities.entities.Activity
+import org.yeffrey.cheesekake.domain.activities.entities.activityTitle
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivitySummaryGateway) : UpdateActivity {
     override suspend fun update(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) {
@@ -19,11 +20,11 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivitySummaryGatew
     }
 }
 
-fun UpdateActivity.Request.toDomain(): ValidatedNel<ValidationError, UpdatedActivity> {
+fun UpdateActivity.Request.toDomain(): ValidatedNel<ValidationError, Activity> {
     return ValidatedNel.applicative<Nel<ValidationError>>(Nel.semigroup()).map(
             this.title.activityTitle(),
             Valid(this.summary)
     ) {(title, summary) ->
-        UpdatedActivity(this.activityId, title, summary)
+        Activity(this.activityId.toOption(), title, summary, 1)
     }.fix()
 }
