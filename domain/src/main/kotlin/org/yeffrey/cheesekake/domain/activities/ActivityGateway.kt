@@ -13,7 +13,8 @@ interface QueryActivityGateway {
     suspend fun query(query: ActivityQueryCriteria): List<ActivitySummary>
 }
 
-interface UpdateActivitySummaryGateway {
+interface UpdateActivityGateway {
+    suspend fun get(id: ActivityId) : Option<Activity>
     suspend fun update(activity: Activity): ActivityId
 }
 data class ActivityQueryCriteria(val titleContains: Option<String>)

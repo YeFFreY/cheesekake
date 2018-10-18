@@ -1,6 +1,5 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
-import arrow.core.Option
 import arrow.data.*
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
@@ -30,6 +29,6 @@ fun CreateActivity.Request.toDomain(): ValidatedNel<ValidationError, Activity> {
             this.title.activityTitle(),
             Valid(this.summary)
     ) {(title, summary) ->
-        Activity(Option.empty(), title, summary, 1)
+        Activity.new(title, summary, 1)
     }.fix()
 }

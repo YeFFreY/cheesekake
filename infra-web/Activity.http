@@ -23,3 +23,14 @@ GET http://localhost:8080/api/activities
 Accept: application/json
 
 ###
+
+PUT http://localhost:8080/api/activities
+Content-Type: application/json
+
+{
+  "id": 2,
+  "title": "Basketball en folie",
+  "summary": "Jouer au baseball en criant comme des fous !"
+}
+
+###

@@ -16,6 +16,7 @@ import io.ktor.sessions.cookie
 import io.ktor.sessions.directorySessionStorage
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivitiesImpl
+import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivityImpl
 import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.activities.ActivityGatewayImpl
@@ -32,6 +33,7 @@ fun Application.main() {
     val activityGateway = ActivityGatewayImpl()
     val userGateway = UserGatewayImpl()
     val createActivity = CreateActivityImpl(activityGateway)
+    val updateActivity = UpdateActivityImpl(activityGateway)
     val queryActivities = QueryActivitiesImpl(activityGateway)
     val registerUser = RegisterUserImpl(userGateway)
 
@@ -45,7 +47,7 @@ fun Application.main() {
     }
     install(Routing) {
         route("/api") {
-            activities(createActivity, queryActivities)
+            activities(createActivity, updateActivity, queryActivities)
             users(registerUser)
         }
     }
