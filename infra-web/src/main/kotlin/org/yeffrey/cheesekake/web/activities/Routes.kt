@@ -14,11 +14,11 @@ fun Route.activities(createActivity: CreateActivity, queryActivities: QueryActiv
     route("/activities") {
         get {
             val queryTitleContains = call.request.queryParameters["titleContains"]
-            queryActivities.find(QueryActivities.Request(queryTitleContains), QueryActivitiesPresenter(call))
+            queryActivities.handle(QueryActivities.Request(queryTitleContains), QueryActivitiesPresenter(call))
         }
         post {
             val input = call.receive<CreateActivityDto>()
-            createActivity.create(input.toRequest(1), CreateActivityPresenter(call))
+            createActivity.handle(input.toRequest(1), CreateActivityPresenter(call))
         }
     }
 }
