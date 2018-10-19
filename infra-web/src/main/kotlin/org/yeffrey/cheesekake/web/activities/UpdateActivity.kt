@@ -17,6 +17,10 @@ fun UpdateActivityDto.toRequest(userId: Int): UpdateActivity.Request {
 }
 
 class UpdateActivityPresenter(private val call: ApplicationCall) : UpdateActivity.Presenter {
+    override suspend fun accessDenied() {
+        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "access denied"))
+    }
+
     override suspend fun notFound(id: Int) {
         call.respond(HttpStatusCode.NotFound, id)
     }

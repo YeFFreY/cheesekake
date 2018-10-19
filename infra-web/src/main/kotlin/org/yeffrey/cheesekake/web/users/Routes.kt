@@ -15,7 +15,7 @@ fun Route.users(registerUser: RegisterUser) {
         route("/registration") {
             post {
                 val registration = call.receive<RegistrationDto>()
-                registerUser.register(registration.toRequest(), RegistrationPresenter(call))
+                registerUser.handle(registration.toRequest(), RegistrationPresenter(call))
             }
         }
     }

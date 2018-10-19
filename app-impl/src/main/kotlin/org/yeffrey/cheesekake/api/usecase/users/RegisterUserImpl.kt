@@ -10,7 +10,7 @@ import org.yeffrey.cheesekake.domain.users.entities.toPassword
 import org.yeffrey.cheesekake.domain.users.entities.toUsername
 
 class RegisterUserImpl(private val userGateway: RegisterUserGateway) : RegisterUser {
-    override suspend fun register(request: RegisterUser.Request, presenter: RegisterUser.Presenter) {
+    override suspend fun handle(request: RegisterUser.Request, presenter: RegisterUser.Presenter) {
         val registration = request.toDomain()
         when (registration) {
             is Valid -> {

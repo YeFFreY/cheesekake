@@ -55,8 +55,8 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun create(activity: Activity): Int = dbQuery {
-        it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
-                .values(activity.title.value, activity.summary)
+        it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
+                .values(activity.title.value, activity.summary, activity.authorId)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }

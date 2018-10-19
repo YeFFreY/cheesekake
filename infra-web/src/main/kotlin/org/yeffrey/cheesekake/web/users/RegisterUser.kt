@@ -16,6 +16,10 @@ fun RegistrationDto.toRequest(): RegisterUser.Request {
 }
 
 class RegistrationPresenter(private val call: ApplicationCall) : RegisterUser.Presenter {
+    override suspend fun accessDenied() {
+        call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "access denied"))
+    }
+
     override suspend fun validationFailed(errors: List<ValidationError>) {
         call.respond(HttpStatusCode.BadRequest, errors)
     }
