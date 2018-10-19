@@ -35,4 +35,14 @@ object DatabaseManager {
     suspend fun <T> dbQuery(block: (dslContext: DSLContext) -> T): T = withContext(dispatcher) {
         block(dslContext)
     }
+
+    suspend fun <T> dbTransaction(block: (dslContext: DSLContext) -> T): T = withContext(dispatcher) {
+        var returnVal: T? = null
+        dslContext.transaction { configuration ->
+            val subContext = DSL.using(configuration)
+            returnVal = block(subContext)
+        }
+        returnVal as T
+    }
 }
+

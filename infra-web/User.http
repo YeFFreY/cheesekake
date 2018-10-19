@@ -8,7 +8,7 @@ POST http://localhost:8080/api/users/registration
 Content-Type: application/json
 
 {
-  "username": "johndoe5",
+  "username": "johndoe6",
   "password": "password123"
 }
 
