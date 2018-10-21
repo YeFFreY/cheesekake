@@ -1,32 +1,34 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
-import arrow.data.*
+import arrow.data.Invalid
+import arrow.data.Valid
+import arrow.data.ValidatedNel
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.activityTitle
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityBase
+import org.yeffrey.cheesekake.domain.activities.entities.Writer
+import org.yeffrey.cheesekake.domain.activities.entities.update
+import org.yeffrey.cheesekake.domain.activities.entities.writtenBy
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
-    override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) {
+    override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
         activityGateway.get(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-            val updatedActivity = request.toDomain(activity)
-            when (updatedActivity) {
-                is Valid -> {
-                    val id = activityGateway.update(updatedActivity.a)
-                    presenter.success(id)
-                }
-                is Invalid -> presenter.validationFailed(updatedActivity.e.all)
+            when (activity.writtenBy(Writer(userId))) {
+                false -> presenter.accessDenied()
+                true -> process(request.toDomain(activity), presenter)
             }
         }
     }
+
+    private suspend fun process(result: ValidatedNel<ValidationError, ActivityBase>, presenter: UpdateActivity.Presenter) {
+        when (result) {
+            is Valid -> presenter.success(activityGateway.update(result.a))
+            is Invalid -> presenter.validationFailed(result.e.all)
+        }
+    }
+
+
 }
 
-fun UpdateActivity.Request.toDomain(activity: Activity): ValidatedNel<ValidationError, Activity> {
-    return ValidatedNel.applicative<Nel<ValidationError>>(Nel.semigroup()).map(
-            this.title.activityTitle(),
-            Valid(this.summary)
-    ) { (title, summary) ->
-        activity.update(title, summary)
-    }.fix()
-}
+fun UpdateActivity.Request.toDomain(activityBase: ActivityBase): ValidatedNel<ValidationError, ActivityBase> = activityBase.update(this.title, this.summary)

@@ -11,7 +11,7 @@ fun String.isMinLength(minLength: Int): Boolean {
 }
 
 sealed class ValidationError(val message: String) {
-    object InvalidTitle: ValidationError("Activity title is invalid")
+    object InvalidTitle: ValidationError("ActivityBase title is invalid")
     object InvalidUsername: ValidationError("Username is invalid")
     object InvalidPassword: ValidationError("Password is invalid")
 }

@@ -3,6 +3,7 @@ package org.yeffrey.cheesekake.persistence.activities
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
+import arrow.core.toOption
 import arrow.data.getOrElse
 import org.jooq.Condition
 import org.jooq.impl.DSL
@@ -10,27 +11,24 @@ import org.yeffrey.cheesekake.domain.activities.ActivityQueryCriteria
 import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityId
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityTitle
-import org.yeffrey.cheesekake.domain.activities.entities.activityTitle
+import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
 
 class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivityGateway {
-    override suspend fun get(id: ActivityId): Option<Activity> = dbQuery {
+    override suspend fun get(id: ActivityId): Option<ActivityBase> = dbQuery {
         val record = it.fetchOne(ACTIVITIES, ACTIVITIES.ID.eq(id))
         Option.fromNullable(record).map { activity ->
-            Activity.from(activity[ACTIVITIES.ID], activity[ACTIVITIES.TITLE].activityTitle().getOrElse { ActivityTitle.invalid(activity[ACTIVITIES.TITLE]) }, activity[ACTIVITIES.SUMMARY], 1)
+            ActivityBase(activity[ACTIVITIES.ID].toOption(), activity[ACTIVITIES.TITLE].activityTitle().getOrElse { ActivityTitle.invalid(activity[ACTIVITIES.TITLE]) }, activity[ACTIVITIES.SUMMARY], Writer(1))
         }
     }
 
-    override suspend fun update(activity: Activity): ActivityId = dbQuery {
+    override suspend fun update(activityBase: ActivityBase): ActivityId = dbQuery {
         it.update(ACTIVITIES)
-                .set(ACTIVITIES.TITLE, activity.title.value)
-                .set(ACTIVITIES.SUMMARY, activity.summary)
-                .where(ACTIVITIES.ID.eq(activity.id.orNull()))
+                .set(ACTIVITIES.TITLE, activityBase.title.value)
+                .set(ACTIVITIES.SUMMARY, activityBase.summary)
+                .where(ACTIVITIES.ID.eq(activityBase.id.orNull()))
                 .returning(ACTIVITIES.ID)
                 .fetchOne().getValue(ACTIVITIES.ID)
     }
@@ -54,9 +52,9 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
         return condition
     }
 
-    override suspend fun create(activity: Activity): Int = dbQuery {
+    override suspend fun create(activityBase: ActivityBase): Int = dbQuery {
         it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .values(activity.title.value, activity.summary, activity.authorId)
+                .values(activityBase.title.value, activityBase.summary, activityBase.writer.userId)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }
