@@ -7,10 +7,9 @@ interface UseCase<R : UseCaseRequest, P : UseCasePresenter> {
 }
 
 
-abstract class UseCaseRequest {
-    var userId : Option<Int> = Option.empty()
-}
+abstract class UseCaseRequest(open val userId: Option<Int> = Option.empty())
 
 interface UseCasePresenter {
     suspend fun accessDenied()
+    suspend fun notFound(id: Int)
 }

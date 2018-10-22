@@ -6,7 +6,7 @@ import arrow.data.ValidatedNel
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityBase
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityDescription
 import org.yeffrey.cheesekake.domain.activities.entities.Writer
 import org.yeffrey.cheesekake.domain.activities.entities.update
 import org.yeffrey.cheesekake.domain.activities.entities.writtenBy
@@ -21,7 +21,7 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
         }
     }
 
-    private suspend fun process(result: ValidatedNel<ValidationError, ActivityBase>, presenter: UpdateActivity.Presenter) {
+    private suspend fun process(result: ValidatedNel<ValidationError, ActivityDescription>, presenter: UpdateActivity.Presenter) {
         when (result) {
             is Valid -> presenter.success(activityGateway.update(result.a))
             is Invalid -> presenter.validationFailed(result.e.all)
@@ -31,4 +31,4 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
 
 }
 
-fun UpdateActivity.Request.toDomain(activityBase: ActivityBase): ValidatedNel<ValidationError, ActivityBase> = activityBase.update(this.title, this.summary)
+fun UpdateActivity.Request.toDomain(activityDescription: ActivityDescription): ValidatedNel<ValidationError, ActivityDescription> = activityDescription.update(this.title, this.summary)
