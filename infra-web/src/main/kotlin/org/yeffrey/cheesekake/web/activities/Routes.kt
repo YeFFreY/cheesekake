@@ -3,13 +3,13 @@ package org.yeffrey.cheesekake.web.activities
 import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.routing.*
-import org.yeffrey.cheesekake.api.usecase.activities.AddResources
+import org.yeffrey.cheesekake.api.usecase.activities.AddResource
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivities
 import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivity
 
 
-fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, addResources: AddResources) {
+fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, addResource: AddResource) {
     route("/activities") {
         get {
             val queryTitleContains = call.request.queryParameters["titleContains"]

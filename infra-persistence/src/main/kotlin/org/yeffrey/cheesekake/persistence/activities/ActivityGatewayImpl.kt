@@ -14,13 +14,39 @@ import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
-import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
-import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITY_RESOURCES
-import org.yeffrey.cheesekake.persistence.db.tables.records.ActivityResourcesRecord
 
 class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivityGateway, AddResourcesActivityGateway {
-    override suspend fun getResources(id: ActivityId): Option<ActivityResources> = dbQuery { dslContext ->
+    override suspend fun activityCreated(data: ActivityCreated): ActivityId = dbQuery {
+        it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
+                .values(data.title, data.summary, data.authorId)
+                .returning(ACTIVITIES.ID)
+                .fetchOne()[ACTIVITIES.ID]
+    }
+
+    override suspend fun getDescription(id: ActivityId): Option<Activity> = dbQuery {
+        it.select(ACTIVITIES.ID, ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+                .from(ACTIVITIES)
+                .where(ACTIVITIES.ID.eq(id))
+                .fetchOne().map { record ->
+                    Option.fromNullable(Activity(record[ACTIVITIES.ID].toOption(), Writer(record[ACTIVITIES.AUTHOR_ID]), ActivityDescription(record[ACTIVITIES.TITLE].activityTitle().getOrElse { ActivityTitle.invalid("Invalid") }, record[ACTIVITIES.SUMMARY])))
+                }
+    }
+
+    override suspend fun descriptionUpdated(data: ActivityDescriptionUpdated): ActivityId {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override suspend fun getResources(id: ActivityId): Option<Activity> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override suspend fun resourceAdded(data: ActivityResourceAdded): ActivityId {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+
+    /*override suspend fun getResources(id: ActivityId): Option<Activity> = dbQuery { dslContext ->
         val resourceIds = dslContext.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES.join(ACTIVITY_RESOURCES).on(ACTIVITIES.ID.eq(ACTIVITY_RESOURCES.ACTIVITY_ID)))
                 .where(ACTIVITIES.ID.eq(id))
@@ -28,7 +54,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
         if (resourceIds.isEmpty()) {
             return@dbQuery Option.empty()
         }
-        return@dbQuery ActivityResources(id.toOption(), Writer(resourceIds.first()[ACTIVITIES.AUTHOR_ID]), resourceIds.map { it[ACTIVITY_RESOURCES.RESOURCE_ID] }.toSet()).toOption()
+        return@dbQuery Activity(id.toOption(), Writer(resourceIds.first()[ACTIVITIES.AUTHOR_ID]), ActivityresourceIds.map { it[ACTIVITY_RESOURCES.RESOURCE_ID] }).toOption()
 
     }
 
@@ -61,7 +87,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 .where(ACTIVITIES.ID.eq(activityBase.id.orNull()))
                 .returning(ACTIVITIES.ID)
                 .fetchOne().getValue(ACTIVITIES.ID)
-    }
+    }*/
 
     override suspend fun query(query: QueryActivityGateway.ActivityQueryCriteria): List<ActivitySummary> = dbQuery {
         it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)

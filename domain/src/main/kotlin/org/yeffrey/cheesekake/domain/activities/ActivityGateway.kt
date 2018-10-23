@@ -1,13 +1,11 @@
 package org.yeffrey.cheesekake.domain.activities
 
 import arrow.core.Option
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityDescription
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityId
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityResources
+import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 
 interface CreateActivityGateway {
-    suspend fun create(activityBase: ActivityDescription): ActivityId
+    suspend fun activityCreated(data: ActivityCreated): ActivityId
 }
 
 interface QueryActivityGateway {
@@ -16,12 +14,12 @@ interface QueryActivityGateway {
 }
 
 interface UpdateActivityGateway {
-    suspend fun getDescription(id: ActivityId): Option<ActivityDescription>
-    suspend fun updateDescription(activityBase: ActivityDescription): ActivityId
+    suspend fun getDescription(id: ActivityId): Option<Activity>
+    suspend fun descriptionUpdated(data: ActivityDescriptionUpdated): ActivityId
 }
 
 interface AddResourcesActivityGateway {
-    suspend fun getResources(id: ActivityId): Option<ActivityResources>
-    suspend fun updateResources(resources: ActivityResources): ActivityId
+    suspend fun getResources(id: ActivityId): Option<Activity>
+    suspend fun resourceAdded(data: ActivityResourceAdded): ActivityId
 
 }
