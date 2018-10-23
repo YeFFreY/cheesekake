@@ -13,7 +13,7 @@ import org.yeffrey.cheesekake.domain.activities.entities.writtenBy
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
     override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
-        activityGateway.get(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
+        activityGateway.getDescription(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
             when (activity.writtenBy(Writer(userId))) {
                 false -> presenter.accessDenied()
                 true -> process(request.toDomain(activity), presenter)
@@ -23,7 +23,7 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
 
     private suspend fun process(result: ValidatedNel<ValidationError, ActivityDescription>, presenter: UpdateActivity.Presenter) {
         when (result) {
-            is Valid -> presenter.success(activityGateway.update(result.a))
+            is Valid -> presenter.success(activityGateway.updateDescription(result.a))
             is Invalid -> presenter.validationFailed(result.e.all)
         }
     }

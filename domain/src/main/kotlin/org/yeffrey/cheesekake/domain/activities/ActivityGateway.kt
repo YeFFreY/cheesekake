@@ -16,12 +16,12 @@ interface QueryActivityGateway {
 }
 
 interface UpdateActivityGateway {
-    suspend fun get(id: ActivityId): Option<ActivityDescription>
-    suspend fun update(activityBase: ActivityDescription): ActivityId
+    suspend fun getDescription(id: ActivityId): Option<ActivityDescription>
+    suspend fun updateDescription(activityBase: ActivityDescription): ActivityId
 }
 
 interface AddResourcesActivityGateway {
-    suspend fun get(id: ActivityId): Option<ActivityResources>
-    suspend fun update(resources: ActivityResources): ActivityId
+    suspend fun getResources(id: ActivityId): Option<ActivityResources>
+    suspend fun updateResources(resources: ActivityResources): ActivityId
 
 }

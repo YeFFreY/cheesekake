@@ -9,7 +9,7 @@ import org.yeffrey.cheesekake.domain.activities.entities.writtenBy
 
 class AddResourcesImpl(private val activityGateway: AddResourcesActivityGateway) : AddResources {
     override suspend fun handle(request: AddResources.Request, presenter: AddResources.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
-        activityGateway.get(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
+        activityGateway.getResources(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
             when (activity.writtenBy(Writer(userId))) {
                 false -> presenter.accessDenied()
                 true -> process(request.toDomain(activity), presenter)
@@ -18,7 +18,7 @@ class AddResourcesImpl(private val activityGateway: AddResourcesActivityGateway)
     }
 
     private suspend fun process(result: ActivityResources, presenter: AddResources.Presenter) {
-        presenter.success(activityGateway.update(result))
+        presenter.success(activityGateway.updateResources(result))
     }
 }
 
