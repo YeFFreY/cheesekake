@@ -12,9 +12,14 @@ import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
+import org.yeffrey.cheesekake.persistence.db.Sequences.ACTIVITIES_ID_SEQ
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
 
 class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivityGateway, AddResourcesActivityGateway {
+    override suspend fun nextIdentity(): ActivityId = dbQuery {
+        it.nextval(ACTIVITIES_ID_SEQ)
+    }
+
     override suspend fun activityCreated(data: ActivityCreated): ActivityId = dbQuery {
         it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .values(data.title, data.summary, data.authorId)

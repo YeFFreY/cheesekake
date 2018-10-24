@@ -5,6 +5,7 @@ import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 
 interface CreateActivityGateway {
+    suspend fun nextIdentity(): ActivityId
     suspend fun activityCreated(data: ActivityCreated): ActivityId
 }
 

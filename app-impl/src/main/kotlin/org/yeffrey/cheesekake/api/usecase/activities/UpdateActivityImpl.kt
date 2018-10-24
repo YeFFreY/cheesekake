@@ -4,12 +4,10 @@ import arrow.data.Invalid
 import arrow.data.Valid
 import arrow.data.ValidatedNel
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
+import org.yeffrey.cheesekake.domain.Result
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.Writer
-import org.yeffrey.cheesekake.domain.activities.entities.updateDescription
-import org.yeffrey.cheesekake.domain.activities.entities.writtenBy
+import org.yeffrey.cheesekake.domain.activities.entities.*
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
     override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
@@ -21,14 +19,9 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
         }
     }
 
-    private suspend fun process(result: ValidatedNel<ValidationError, Activity>, presenter: UpdateActivity.Presenter) {
+    private suspend fun process(result: ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>>, presenter: UpdateActivity.Presenter) {
         when (result) {
-            is Valid -> {
-                result.a.publishedEvents().forEach {
-                    activityGateway.descriptionUpdated(it)
-                }
-                presenter.success(activityGateway.descriptionUpdated())
-            }
+            is Valid -> presenter.success(activityGateway.descriptionUpdated(result.a.event))
             is Invalid -> presenter.validationFailed(result.e.all)
         }
     }
@@ -36,4 +29,4 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
 
 }
 
-fun UpdateActivity.Request.toDomain(activity: Activity): ValidatedNel<ValidationError, Activity> = activity.updateDescription(this.title, this.summary)
+fun UpdateActivity.Request.toDomain(activity: Activity): ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>> = activity.updateDescription(this.title, this.summary)

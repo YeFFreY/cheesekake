@@ -1,14 +1,8 @@
 package org.yeffrey.cheesekake.domain.activities.entities
 
-import arrow.core.None
 import arrow.core.Option
-import arrow.core.Some
-import arrow.core.toOption
 import arrow.data.*
-import org.yeffrey.cheesekake.domain.Aggregate
-import org.yeffrey.cheesekake.domain.Event
-import org.yeffrey.cheesekake.domain.ValidationError
-import org.yeffrey.cheesekake.domain.isNotBlankAndMaxLength
+import org.yeffrey.cheesekake.domain.*
 import org.yeffrey.cheesekake.domain.users.entities.UserId
 
 data class Writer(val userId: UserId)
@@ -21,15 +15,15 @@ data class ActivityDescriptionUpdated(val id: Int, val title: String, val summar
 data class ActivityResourceAdded(val id: Int, val resourceId: Int, val authorId: Int) : Event
 
 data class Activity internal constructor(
-        val id: Option<ActivityId> = Option.empty(),
+        val id: ActivityId,
         val writer: Writer,
         val description: ActivityDescription,
         val resources: Set<ResourceId> = emptySet(),
         val skills: Set<SkillId> = emptySet()) : Aggregate() {
     companion object {
-        fun new(title: String, summary: String, writer: Writer): ValidatedNel<ValidationError, Activity> {
+        fun new(id: ActivityId, title: String, summary: String, writer: Writer): ValidatedNel<ValidationError, Activity> {
             return validate(title, summary) { t, s ->
-                val activity = Activity(writer = writer, description = ActivityDescription(t, s))
+                val activity = Activity(id, writer, ActivityDescription(t, s))
                 activity.eventHolder.publish(ActivityCreated(activity.description.title.value, activity.description.summary, activity.writer.userId))
                 activity
             }
@@ -38,8 +32,8 @@ data class Activity internal constructor(
         fun from(memento: ActivityMemento): Option<Activity> {
             return ActivityTitle.from(memento.title).map {
                 ActivityDescription(it, memento.summary)
-            }.map {
-                Activity(id = memento.id.toOption(), writer = Writer(memento.authorId), description = it)
+            }.map { description ->
+                Activity(memento.id, Writer(memento.authorId), description)
             }.toOption()
         }
     }
@@ -50,24 +44,18 @@ data class ActivityMemento(val id: Int, val authorId: Int, val title: String, va
 data class ActivityDescription(val title: ActivityTitle, val summary: String)
 
 
-fun Activity.updateDescription(title: String, summary: String): ValidatedNel<ValidationError, Activity> {
+fun Activity.updateDescription(title: String, summary: String): ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>> {
     return validate(title, summary) { t, s ->
-        val activity = this.copy(description = ActivityDescription(title = t, summary = s))
-        when (activity.id) {
-            is None -> Unit
-            is Some -> activity.eventHolder.publish(ActivityDescriptionUpdated(activity.id.t, activity.description.title.value, activity.description.summary, activity.writer.userId))
-        }
-        activity
+        this.copy(description = ActivityDescription(title = t, summary = s))
+    }.map { activity ->
+        Result(activity, ActivityDescriptionUpdated(this.id, activity.description.title.value, activity.description.summary, activity.writer.userId))
     }
 }
 
 fun Activity.add(resourceId: ResourceId): Activity {
     val newResources = this.resources.plus(resourceId)
     val activity = this.copy(resources = newResources)
-    when (activity.id) {
-        is None -> Unit
-        is Some -> activity.eventHolder.publish(ActivityResourceAdded(activity.id.t, resourceId, activity.writer.userId))
-    }
+    activity.eventHolder.publish(ActivityResourceAdded(activity.id, resourceId, activity.writer.userId))
     return activity
 }
 

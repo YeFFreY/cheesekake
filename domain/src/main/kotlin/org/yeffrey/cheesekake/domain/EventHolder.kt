@@ -20,3 +20,5 @@ open class Aggregate {
     internal val eventHolder = EventHolderImpl()
     fun publishedEvents(): List<Event> = eventHolder.publishedEvents()
 }
+
+data class Result<T, E : Event>(val result: T, val event: E)
