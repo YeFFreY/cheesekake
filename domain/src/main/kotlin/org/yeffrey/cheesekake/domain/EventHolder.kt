@@ -18,4 +18,5 @@ class EventHolderImpl : EventHolder {
 
 open class Aggregate {
     internal val eventHolder = EventHolderImpl()
+    fun publishedEvents(): List<Event> = eventHolder.publishedEvents()
 }

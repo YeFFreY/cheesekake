@@ -3,8 +3,6 @@ package org.yeffrey.cheesekake.persistence.activities
 import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
-import arrow.core.toOption
-import arrow.data.getOrElse
 import org.jooq.Condition
 import org.jooq.impl.DSL
 import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
@@ -29,7 +27,8 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne().map { record ->
-                    Option.fromNullable(Activity(record[ACTIVITIES.ID].toOption(), Writer(record[ACTIVITIES.AUTHOR_ID]), ActivityDescription(record[ACTIVITIES.TITLE].activityTitle().getOrElse { ActivityTitle.invalid("Invalid") }, record[ACTIVITIES.SUMMARY])))
+                    val memento = ActivityMemento(record[ACTIVITIES.ID], record[ACTIVITIES.AUTHOR_ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
+                    Activity.from(memento)
                 }
     }
 
