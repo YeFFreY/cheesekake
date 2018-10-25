@@ -28,9 +28,17 @@ PUT http://localhost:8080/api/activities
 Content-Type: application/json
 
 {
-  "id": 2,
+  "id": 9,
   "title": "Basketball en folie",
   "summary": "Jouer au baseball en criant comme des fous !"
+}
+
+###
+POST http://localhost:8080/api/activities/9/resources
+Content-Type: application/json
+
+{
+  "resourceId": 6
 }
 
 ###

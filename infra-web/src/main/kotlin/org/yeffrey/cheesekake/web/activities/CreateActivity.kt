@@ -12,7 +12,7 @@ fun CreateActivityDto.toRequest(userId: Int): CreateActivity.Request = CreateAct
 
 class CreateActivityPresenter(private val call: ApplicationCall) : CreateActivity.Presenter {
     override suspend fun notFound(id: Int) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        call.respond(HttpStatusCode.NotFound, id)
     }
 
     override suspend fun accessDenied() {

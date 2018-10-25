@@ -2,7 +2,10 @@ package org.yeffrey.cheesekake.domain.activities.entities
 
 import arrow.core.Option
 import arrow.data.*
-import org.yeffrey.cheesekake.domain.*
+import org.yeffrey.cheesekake.domain.Event
+import org.yeffrey.cheesekake.domain.Result
+import org.yeffrey.cheesekake.domain.ValidationError
+import org.yeffrey.cheesekake.domain.isNotBlankAndMaxLength
 import org.yeffrey.cheesekake.domain.users.entities.UserId
 
 data class Writer(val userId: UserId)
@@ -19,13 +22,13 @@ data class Activity internal constructor(
         val writer: Writer,
         val description: ActivityDescription,
         val resources: Set<ResourceId> = emptySet(),
-        val skills: Set<SkillId> = emptySet()) : Aggregate() {
+        val skills: Set<SkillId> = emptySet()) {
     companion object {
-        fun new(id: ActivityId, title: String, summary: String, writer: Writer): ValidatedNel<ValidationError, Activity> {
+        fun new(id: ActivityId, title: String, summary: String, writer: Writer): ValidatedNel<ValidationError, Result<Activity, ActivityCreated>> {
             return validate(title, summary) { t, s ->
-                val activity = Activity(id, writer, ActivityDescription(t, s))
-                activity.eventHolder.publish(ActivityCreated(activity.description.title.value, activity.description.summary, activity.writer.userId))
-                activity
+                Activity(id, writer, ActivityDescription(t, s))
+            }.map { activity ->
+                Result(activity, ActivityCreated(activity.description.title.value, activity.description.summary, activity.writer.userId))
             }
         }
 
@@ -33,7 +36,7 @@ data class Activity internal constructor(
             return ActivityTitle.from(memento.title).map {
                 ActivityDescription(it, memento.summary)
             }.map { description ->
-                Activity(memento.id, Writer(memento.authorId), description)
+                Activity(memento.id, Writer(memento.authorId), description, memento.resources, memento.skills)
             }.toOption()
         }
     }
@@ -52,11 +55,15 @@ fun Activity.updateDescription(title: String, summary: String): ValidatedNel<Val
     }
 }
 
-fun Activity.add(resourceId: ResourceId): Activity {
-    val newResources = this.resources.plus(resourceId)
-    val activity = this.copy(resources = newResources)
-    activity.eventHolder.publish(ActivityResourceAdded(activity.id, resourceId, activity.writer.userId))
-    return activity
+fun Activity.add(resourceId: ResourceId): ValidatedNel<ValidationError, Result<Activity, ActivityResourceAdded>> {
+    return when (this.resources.contains(resourceId)) {
+        true -> Invalid(ValidationError.DuplicateActivityResource).toValidatedNel()
+        false -> {
+            val newResources = this.resources.plus(resourceId)
+            val activity = this.copy(resources = newResources)
+            Valid(Result(activity, ActivityResourceAdded(activity.id, resourceId, activity.writer.userId)))
+        }
+    }
 }
 
 

@@ -17,16 +17,18 @@ fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActiv
         }
         post {
             val input = call.receive<CreateActivityDto>()
-            createActivity.handle(input.toRequest(1), CreateActivityPresenter(call))
+            createActivity.handle(input.toRequest(5), CreateActivityPresenter(call))
         }
         put {
             val input = call.receive<UpdateActivityDto>()
-            updateActivity.handle(input.toRequest(1), UpdateActivityPresenter(call))
+            updateActivity.handle(input.toRequest(5), UpdateActivityPresenter(call))
 
         }
         route("{activityId}/resources") {
             post {
-                val activityId = call.parameters["activityId"]
+                val input = call.receive<AddResourceDto>()
+                val activityId = call.parameters["activityId"]?.toInt() ?: -1
+                addResource.handle(input.toRequest(activityId, 5), AddResourcePresenter(call))
             }
         }
     }

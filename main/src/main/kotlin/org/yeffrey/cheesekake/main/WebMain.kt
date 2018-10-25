@@ -14,6 +14,7 @@ import io.ktor.server.netty.Netty
 import io.ktor.sessions.Sessions
 import io.ktor.sessions.cookie
 import io.ktor.sessions.directorySessionStorage
+import org.yeffrey.cheesekake.api.usecase.activities.AddResourceImpl
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivityImpl
@@ -35,6 +36,7 @@ fun Application.main() {
     val createActivity = CreateActivityImpl(activityGateway)
     val updateActivity = UpdateActivityImpl(activityGateway)
     val queryActivities = QueryActivitiesImpl(activityGateway)
+    val addResource = AddResourceImpl(activityGateway)
     val registerUser = RegisterUserImpl(userGateway)
 
     install(DefaultHeaders)
@@ -47,7 +49,7 @@ fun Application.main() {
     }
     install(Routing) {
         route("/api") {
-            activities(createActivity, updateActivity, queryActivities)
+            activities(createActivity, updateActivity, queryActivities, addResource)
             users(registerUser)
         }
     }

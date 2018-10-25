@@ -12,12 +12,13 @@ import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
+import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Sequences.ACTIVITIES_ID_SEQ
-import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
+import org.yeffrey.cheesekake.persistence.db.Tables.*
 
 class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivityGateway, AddResourcesActivityGateway {
     override suspend fun nextIdentity(): ActivityId = dbQuery {
-        it.nextval(ACTIVITIES_ID_SEQ)
+        it.nextval(ACTIVITIES_ID_SEQ).toInt()
     }
 
     override suspend fun activityCreated(data: ActivityCreated): ActivityId = dbQuery {
@@ -28,70 +29,44 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun getDescription(id: ActivityId): Option<Activity> = dbQuery {
-        it.select(ACTIVITIES.ID, ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        val record = it.select(ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
-                .fetchOne().map { record ->
-                    val memento = ActivityMemento(record[ACTIVITIES.ID], record[ACTIVITIES.AUTHOR_ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
-                    Activity.from(memento)
-                }
+                .fetchOne()
+        Option.fromNullable(record).flatMap { record ->
+            val memento = ActivityMemento(id, record[ACTIVITIES.AUTHOR_ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
+            Activity.from(memento)
+        }
     }
 
     override suspend fun descriptionUpdated(data: ActivityDescriptionUpdated): ActivityId {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
-    override suspend fun getResources(id: ActivityId): Option<Activity> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    override suspend fun resourceAdded(data: ActivityResourceAdded): ActivityId {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-
-    /*override suspend fun getResources(id: ActivityId): Option<Activity> = dbQuery { dslContext ->
-        val resourceIds = dslContext.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITIES.AUTHOR_ID)
-                .from(ACTIVITIES.join(ACTIVITY_RESOURCES).on(ACTIVITIES.ID.eq(ACTIVITY_RESOURCES.ACTIVITY_ID)))
+    override suspend fun getResources(id: ActivityId): Option<Activity> = dbQuery {
+        val record = it.select(ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+                .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
-                .fetch()
-        if (resourceIds.isEmpty()) {
-            return@dbQuery Option.empty()
-        }
-        return@dbQuery Activity(id.toOption(), Writer(resourceIds.first()[ACTIVITIES.AUTHOR_ID]), ActivityresourceIds.map { it[ACTIVITY_RESOURCES.RESOURCE_ID] }).toOption()
-
-    }
-
-    override suspend fun updateResources(resources: ActivityResources): ActivityId = dbTransaction { dslContext ->
-        dslContext.delete(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.RESOURCE_ID.notIn(resources.resources)).execute()
-        val existingResources = dslContext.selectFrom(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(resources.id.orNull())).fetch()
-        existingResources.addAll(resources.resources.map { ActivityResourcesRecord(resources.id.orNull(), it) })
-        dslContext.batchStore(existingResources).execute()
-        resources.id.get()
-    }
-
-    override suspend fun getDescription(id: ActivityId): Option<ActivityDescription> = dbQuery {
-        val record = it.fetchOne(ACTIVITIES, ACTIVITIES.ID.eq(id))
-        Option.fromNullable(record).map { activity ->
-            ActivityDescription(activity[ACTIVITIES.ID].toOption(), Writer(activity[ACTIVITIES.AUTHOR_ID]), activity[ACTIVITIES.TITLE].activityTitle().getOrElse { ActivityTitle.invalid(activity[ACTIVITIES.TITLE]) }, activity[ACTIVITIES.SUMMARY])
+                .fetchOne()
+        Option.fromNullable(record).flatMap { activity ->
+            val resourceIds = it.select(ACTIVITY_RESOURCES.RESOURCE_ID).from(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { resource ->
+                resource[ACTIVITY_RESOURCES.RESOURCE_ID]
+            }
+            val memento = ActivityMemento(id, activity[ACTIVITIES.AUTHOR_ID], activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resourceIds.toSet())
+            Activity.from(memento)
         }
     }
 
-    override suspend fun create(activityBase: ActivityDescription): Int = dbQuery {
-        it.insertInto(ACTIVITIES, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .values(activityBase.title.value, activityBase.summary, activityBase.writer.userId)
-                .returning(ACTIVITIES.ID)
-                .fetchOne()[ACTIVITIES.ID]
+    override suspend fun resourceAdded(data: ActivityResourceAdded): ActivityId = dbTransaction {
+        it.insertInto(ACTIVITY_RESOURCES, ACTIVITY_RESOURCES.ACTIVITY_ID, ACTIVITY_RESOURCES.RESOURCE_ID)
+                .values(data.id, data.resourceId)
+                .returning(ACTIVITY_RESOURCES.ACTIVITY_ID)
+                .fetchOne()[ACTIVITY_RESOURCES.ACTIVITY_ID]
     }
 
-    override suspend fun updateDescription(activityBase: ActivityDescription): ActivityId = dbQuery {
-        it.update(ACTIVITIES)
-                .set(ACTIVITIES.TITLE, activityBase.title.value)
-                .set(ACTIVITIES.SUMMARY, activityBase.summary)
-                .where(ACTIVITIES.ID.eq(activityBase.id.orNull()))
-                .returning(ACTIVITIES.ID)
-                .fetchOne().getValue(ACTIVITIES.ID)
-    }*/
+    override suspend fun exists(id: ResourceId): Boolean = dbQuery {
+        it.select(RESOURCES.ID).from(RESOURCES).where(RESOURCES.ID.eq(id)).fetchOne() != null
+    }
 
     override suspend fun query(query: QueryActivityGateway.ActivityQueryCriteria): List<ActivitySummary> = dbQuery {
         it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)

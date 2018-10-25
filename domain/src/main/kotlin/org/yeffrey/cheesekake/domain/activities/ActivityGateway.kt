@@ -21,6 +21,7 @@ interface UpdateActivityGateway {
 
 interface AddResourcesActivityGateway {
     suspend fun getResources(id: ActivityId): Option<Activity>
+    suspend fun exists(id: ResourceId): Boolean
     suspend fun resourceAdded(data: ActivityResourceAdded): ActivityId
 
 }
