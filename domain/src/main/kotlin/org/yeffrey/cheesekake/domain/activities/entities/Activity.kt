@@ -13,7 +13,7 @@ typealias ActivityId = Int
 typealias ResourceId = Int
 typealias SkillId = Int
 
-data class ActivityCreated(val title: String, val summary: String, val authorId: Int) : Event
+data class ActivityCreated(val id: ActivityId, val title: String, val summary: String, val authorId: Int) : Event
 data class ActivityDescriptionUpdated(val id: Int, val title: String, val summary: String, val authorId: Int) : Event
 data class ActivityResourceAdded(val id: Int, val resourceId: Int, val authorId: Int) : Event
 
@@ -28,7 +28,7 @@ data class Activity internal constructor(
             return validate(title, summary) { t, s ->
                 Activity(id, writer, ActivityDescription(t, s))
             }.map { activity ->
-                Result(activity, ActivityCreated(activity.description.title.value, activity.description.summary, activity.writer.userId))
+                Result(activity, ActivityCreated(activity.id, activity.description.title.value, activity.description.summary, activity.writer.userId))
             }
         }
 

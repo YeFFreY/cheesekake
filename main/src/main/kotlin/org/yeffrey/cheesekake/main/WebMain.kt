@@ -2,9 +2,11 @@ package org.yeffrey.cheesekake.main
 
 import io.ktor.application.Application
 import io.ktor.application.install
+import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
+import io.ktor.http.HttpMethod
 import io.ktor.jackson.jackson
 import io.ktor.routing.Routing
 import io.ktor.routing.route
@@ -41,6 +43,10 @@ fun Application.main() {
 
     install(DefaultHeaders)
     install(CallLogging)
+    install(CORS) {
+        method(HttpMethod.Options)
+        host("*")
+    }
     install(Sessions) {
         cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true))
     }
