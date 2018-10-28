@@ -4,7 +4,7 @@
 # * 'gtrp' and 'gtr' create a GET request with or without query parameters;
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
-POST http://localhost:8080/api/activities
+POST http://localhost:{{port}}/api/activities
 Content-Type: application/json
 
 {
@@ -14,31 +14,31 @@ Content-Type: application/json
 
 ###
 
-GET http://localhost:8080/api/activities?titleContains=foot
+GET http://localhost:{{port}}/api/activities?titleContains=foot
 Accept: application/json
 
 ###
 
-GET http://localhost:8080/api/activities
+GET http://localhost:{{port}}/api/activities
 Accept: application/json
 
 ###
 
-PUT http://localhost:8080/api/activities
+PUT http://localhost:{{port}}/api/activities
 Content-Type: application/json
 
 {
-  "id": 9,
-  "title": "Basketball en folie",
+  "id": 5,
+  "title": "Football en folie",
   "summary": "Jouer au baseball en criant comme des fous !"
 }
 
 ###
-POST http://localhost:8080/api/activities/9/resources
+POST http://localhost:{{port}}/api/activities/5/resources
 Content-Type: application/json
 
 {
-  "resourceId": 6
+  "resourceId": 4
 }
 
 ###
