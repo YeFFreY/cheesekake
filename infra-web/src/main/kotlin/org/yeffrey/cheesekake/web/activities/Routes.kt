@@ -3,13 +3,10 @@ package org.yeffrey.cheesekake.web.activities
 import io.ktor.application.call
 import io.ktor.request.receive
 import io.ktor.routing.*
-import org.yeffrey.cheesekake.api.usecase.activities.AddResource
-import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
-import org.yeffrey.cheesekake.api.usecase.activities.QueryActivities
-import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivity
+import org.yeffrey.cheesekake.api.usecase.activities.*
 
 
-fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, addResource: AddResource) {
+fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, getActivityDetails: GetActivityDetails, addResource: AddResource) {
     route("/activities") {
         get {
             val queryTitleContains = call.request.queryParameters["titleContains"]
@@ -19,16 +16,23 @@ fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActiv
             val input = call.receive<CreateActivityDto>()
             createActivity.handle(input.toRequest(5), CreateActivityPresenter(call))
         }
-        put {
-            val input = call.receive<UpdateActivityDto>()
-            updateActivity.handle(input.toRequest(5), UpdateActivityPresenter(call))
-
-        }
-        route("{activityId}/resources") {
-            post {
-                val input = call.receive<AddResourceDto>()
+        route("{activityId}") {
+            get {
                 val activityId = call.parameters["activityId"]?.toInt() ?: -1
-                addResource.handle(input.toRequest(activityId, 5), AddResourcePresenter(call))
+                getActivityDetails.handle(GetActivityDetails.Request(activityId), GetActivityDetailsPresenter(call))
+            }
+            put {
+                val input = call.receive<UpdateActivityDto>()
+                val activityId = call.parameters["activityId"]?.toInt() ?: -1
+                updateActivity.handle(input.toRequest(5, activityId), UpdateActivityPresenter(call))
+            }
+
+            route("resources") {
+                post {
+                    val input = call.receive<AddResourceDto>()
+                    val activityId = call.parameters["activityId"]?.toInt() ?: -1
+                    addResource.handle(input.toRequest(activityId, 5), AddResourcePresenter(call))
+                }
             }
         }
     }

@@ -5,3 +5,4 @@
 **/generated
 **/out
 **/build
+**/http-requests-log.http

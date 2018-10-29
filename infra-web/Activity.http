@@ -24,14 +24,17 @@ Accept: application/json
 
 ###
 
-PUT http://localhost:{{port}}/api/activities
+PUT http://localhost:{{port}}/api/activities/5
 Content-Type: application/json
 
 {
-  "id": 5,
-  "title": "Football en folie",
-  "summary": "Jouer au baseball en criant comme des fous !"
+  "title": "Updated activity",
+  "summary": "Updated activity summary"
 }
+
+###
+GET http://localhost:{{port}}/api/activities/5
+Content-Type: application/json
 
 ###
 POST http://localhost:{{port}}/api/activities/5/resources

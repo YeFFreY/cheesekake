@@ -5,18 +5,29 @@ import arrow.core.Option
 import arrow.core.Some
 import org.jooq.Condition
 import org.jooq.impl.DSL
-import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
-import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
-import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
+import org.yeffrey.cheesekake.domain.activities.*
 import org.yeffrey.cheesekake.domain.activities.entities.*
+import org.yeffrey.cheesekake.domain.activities.query.ActivityDetails
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummary
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Sequences.ACTIVITIES_ID_SEQ
 import org.yeffrey.cheesekake.persistence.db.Tables.*
 
-class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivityGateway, AddResourcesActivityGateway {
+class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivitiesGateway, QueryActivityGateway, AddResourcesActivityGateway {
+    override suspend fun get(id: Int): Option<ActivityDetails> = dbQuery {
+        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+                .from(ACTIVITIES)
+                .where(ACTIVITIES.ID.eq(id))
+                .fetchOne()
+        Option.fromNullable(record).map { activity ->
+            val resourceIds = it.select(ACTIVITY_RESOURCES.RESOURCE_ID).from(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { resource ->
+                resource[ACTIVITY_RESOURCES.RESOURCE_ID]
+            }
+            ActivityDetails(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resourceIds)
+        }
+    }
+
     override suspend fun nextIdentity(): ActivityId = dbQuery {
         it.nextval(ACTIVITIES_ID_SEQ).toInt()
     }
@@ -33,14 +44,19 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()
-        Option.fromNullable(record).flatMap { record ->
-            val memento = ActivityMemento(id, record[ACTIVITIES.AUTHOR_ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
+        Option.fromNullable(record).flatMap { activity ->
+            val memento = ActivityMemento(id, activity[ACTIVITIES.AUTHOR_ID], activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY])
             Activity.from(memento)
         }
     }
 
-    override suspend fun descriptionUpdated(data: ActivityDescriptionUpdated): ActivityId {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    override suspend fun descriptionUpdated(data: ActivityDescriptionUpdated): ActivityId = dbTransaction {
+        it.update(ACTIVITIES)
+                .set(ACTIVITIES.TITLE, data.title)
+                .set(ACTIVITIES.SUMMARY, data.summary)
+                .where(ACTIVITIES.ID.eq(data.id).and(ACTIVITIES.AUTHOR_ID.eq(data.authorId)))
+                .returning(ACTIVITIES.ID)
+                .fetchOne()[ACTIVITIES.ID]
     }
 
     override suspend fun getResources(id: ActivityId): Option<Activity> = dbQuery {
@@ -68,7 +84,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
         it.select(RESOURCES.ID).from(RESOURCES).where(RESOURCES.ID.eq(id)).fetchOne() != null
     }
 
-    override suspend fun query(query: QueryActivityGateway.ActivityQueryCriteria): List<ActivitySummary> = dbQuery {
+    override suspend fun query(query: QueryActivitiesGateway.ActivityQueryCriteria): List<ActivitySummary> = dbQuery {
         it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
                 .from(ACTIVITIES)
                 .where(query.toCondition())
@@ -77,7 +93,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 }
     }
 
-    private fun QueryActivityGateway.ActivityQueryCriteria.toCondition(): Condition {
+    private fun QueryActivitiesGateway.ActivityQueryCriteria.toCondition(): Condition {
         var condition: Condition = DSL.trueCondition()
         val titleContains = this.titleContains
         condition = when (titleContains) {

@@ -7,9 +7,9 @@ import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivity
 import org.yeffrey.cheesekake.domain.ValidationError
 
 
-data class UpdateActivityDto(val id: Int, val title: String, val summary: String)
+data class UpdateActivityDto(val title: String, val summary: String)
 
-fun UpdateActivityDto.toRequest(userId: Int): UpdateActivity.Request = UpdateActivity.Request(userId, this.id, this.title, this.summary)
+fun UpdateActivityDto.toRequest(userId: Int, activityId: Int): UpdateActivity.Request = UpdateActivity.Request(userId, activityId, this.title, this.summary)
 
 class UpdateActivityPresenter(private val call: ApplicationCall) : UpdateActivity.Presenter {
     override suspend fun accessDenied() {
