@@ -2,13 +2,13 @@ package org.yeffrey.cheesekake.persistence
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import kotlinx.coroutines.experimental.newFixedThreadPoolContext
-import kotlinx.coroutines.experimental.withContext
+import kotlinx.coroutines.newFixedThreadPoolContext
+import kotlinx.coroutines.withContext
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
 import javax.sql.DataSource
-import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.coroutines.CoroutineContext
 
 object DatabaseManager {
     private lateinit var dispatcher: CoroutineContext
@@ -36,6 +36,7 @@ object DatabaseManager {
         block(dslContext)
     }
 
+    @Suppress("UNCHECKED_CAST")
     suspend fun <T> dbTransaction(block: (dslContext: DSLContext) -> T): T = withContext(dispatcher) {
         var returnVal: T? = null
         dslContext.transaction { configuration ->

@@ -5,8 +5,8 @@ import arrow.data.Invalid
 import arrow.data.Valid
 import arrow.data.ValidatedNel
 import org.yeffrey.cheesekake.domain.ValidationError
-import org.yeffrey.cheesekake.domain.isMinLength
-import org.yeffrey.cheesekake.domain.isNotBlankAndMaxLength
+import org.yeffrey.core.utils.isMaxLength
+import org.yeffrey.core.utils.isMinLength
 
 typealias UserId = Int
 class Username internal constructor(val value: String)
@@ -14,7 +14,7 @@ class Password internal constructor(val value: String)
 
 fun String.toUsername() : ValidatedNel<ValidationError, Username> {
     return when {
-        this.isNotBlankAndMaxLength(400) -> Valid(Username(this))
+        this.isMaxLength(400) && this.isNotBlank() -> Valid(Username(this))
         else -> Invalid(ValidationError.InvalidUsername).toValidatedNel()
     }
 }
@@ -27,7 +27,7 @@ fun String.toPassword() : ValidatedNel<ValidationError, Password> {
 }
 
 private fun validPassword(value: String) : Boolean {
-    return value.isNotBlankAndMaxLength(72) && value.isMinLength(10)
+    return value.isNotBlank() && value.isMaxLength(72) && value.isMinLength(10)
 }
 
 data class Credentials(val username: Username, val password: Password)

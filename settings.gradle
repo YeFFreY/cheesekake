@@ -6,3 +6,5 @@ include "app-impl"
 include "infra-persistence"
 include "infra-web"
 include "main"
+include 'core'
+

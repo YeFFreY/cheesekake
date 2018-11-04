@@ -33,19 +33,19 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun activityCreated(data: ActivityCreated): ActivityId = dbQuery {
-        it.insertInto(ACTIVITIES, ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .values(data.id, data.title, data.summary, data.authorId)
+        it.insertInto(ACTIVITIES, ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+                .values(data.id, data.title, data.summary)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }
 
     override suspend fun getDescription(id: ActivityId): Option<Activity> = dbQuery {
-        val record = it.select(ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()
         Option.fromNullable(record).flatMap { activity ->
-            val memento = ActivityMemento(id, activity[ACTIVITIES.AUTHOR_ID], activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY])
+            val memento = ActivityMemento(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY])
             Activity.from(memento)
         }
     }
@@ -54,13 +54,13 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
         it.update(ACTIVITIES)
                 .set(ACTIVITIES.TITLE, data.title)
                 .set(ACTIVITIES.SUMMARY, data.summary)
-                .where(ACTIVITIES.ID.eq(data.id).and(ACTIVITIES.AUTHOR_ID.eq(data.authorId)))
+                .where(ACTIVITIES.ID.eq(data.id))
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }
 
     override suspend fun getResources(id: ActivityId): Option<Activity> = dbQuery {
-        val record = it.select(ACTIVITIES.AUTHOR_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()
@@ -68,7 +68,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
             val resourceIds = it.select(ACTIVITY_RESOURCES.RESOURCE_ID).from(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { resource ->
                 resource[ACTIVITY_RESOURCES.RESOURCE_ID]
             }
-            val memento = ActivityMemento(id, activity[ACTIVITIES.AUTHOR_ID], activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resourceIds.toSet())
+            val memento = ActivityMemento(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resourceIds.toSet())
             Activity.from(memento)
         }
     }

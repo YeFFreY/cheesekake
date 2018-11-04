@@ -10,12 +10,11 @@ import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.Activity
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreated
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityId
-import org.yeffrey.cheesekake.domain.activities.entities.Writer
 
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : CreateActivity {
     override suspend fun handle(request: CreateActivity.Request, presenter: CreateActivity.Presenter) = mustBeAuthenticated(request, presenter) {
         val newActivityId = activityGateway.nextIdentity()
-        val newActivity = request.toDomain(newActivityId, Writer(it))
+        val newActivity = request.toDomain(newActivityId)
         when (newActivity) {
             is Valid -> presenter.success(activityGateway.activityCreated(newActivity.a.event))
             is Invalid -> presenter.validationFailed(newActivity.e.all)
@@ -23,4 +22,4 @@ class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : C
     }
 }
 
-fun CreateActivity.Request.toDomain(newId: ActivityId, writer: Writer): ValidatedNel<ValidationError, Result<Activity, ActivityCreated>> = Activity.new(newId, this.title, this.summary, writer)
+fun CreateActivity.Request.toDomain(newId: ActivityId): ValidatedNel<ValidationError, Result<Activity, ActivityCreated>> = Activity.new(newId, this.title, this.summary)
