@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.domain.activities.entities
 
+
 import arrow.core.Option
 import arrow.data.*
 import org.yeffrey.cheesekake.domain.Event
@@ -41,7 +42,7 @@ data class Activity internal constructor(
 
 data class ActivityMemento(val id: Int, val title: String, val summary: String, val resources: Set<Int> = emptySet(), val skills: Set<SkillId> = emptySet())
 
-data class ActivityDescription(val title: ActivityTitle, val summary: String)
+data class ActivityDescription(val title: ActivityTitleTwo, val summary: String)
 
 
 fun Activity.updateDescription(title: String, summary: String): ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>> {
@@ -66,10 +67,10 @@ fun Activity.add(resourceId: ResourceId): ValidatedNel<ValidationError, Result<A
 
 data class ActivityTitle internal constructor(val value: String) {
     companion object {
-        fun from(value: String): Validated<ValidationError, ActivityTitle> {
+        fun from(value: String): Validated<ValidationError, ActivityTitleTwo> {
             return when (ActivityTitle.isValid(value)) {
-                true -> Valid(ActivityTitle(value))
-                else -> Invalid(ValidationError.InvalidTitle)
+                true -> Valid(ActivityTitleTwo(value))
+                else -> Invalid(ValidationError.InvalidActivityTitle)
             }
         }
 
@@ -77,7 +78,7 @@ data class ActivityTitle internal constructor(val value: String) {
     }
 }
 
-private fun validate(title: String, summary: String, block: (ActivityTitle, String) -> Activity): ValidatedNel<ValidationError, Activity> {
+private fun validate(title: String, summary: String, block: (ActivityTitleTwo, String) -> Activity): ValidatedNel<ValidationError, Activity> {
     return ValidatedNel.applicative<Nel<ValidationError>>(Nel.semigroup()).map(
             ActivityTitle.from(title).toValidatedNel(),
             Valid(summary)
