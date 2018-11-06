@@ -3,8 +3,8 @@ package org.yeffrey.cheesekake.domain.activities.entities
 
 import arrow.core.Option
 import arrow.data.*
+import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.Event
-import org.yeffrey.cheesekake.domain.Result
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.core.utils.isMaxLength
 
@@ -22,11 +22,11 @@ data class Activity internal constructor(
         val resources: Set<ResourceId> = emptySet(),
         val skills: Set<SkillId> = emptySet()) {
     companion object {
-        fun new(id: ActivityId, title: String, summary: String): ValidatedNel<ValidationError, Result<Activity, ActivityCreated>> {
+        fun new(id: ActivityId, title: String, summary: String): ValidatedNel<ValidationError, CommandResult<Activity, ActivityCreated>> {
             return validate(title, summary) { t, s ->
                 Activity(id, ActivityDescription(t, s))
             }.map { activity ->
-                Result(activity, ActivityCreated(activity.id, activity.description.title.value, activity.description.summary))
+                CommandResult(activity, ActivityCreated(activity.id, activity.description.title.value, activity.description.summary))
             }
         }
 
@@ -45,21 +45,21 @@ data class ActivityMemento(val id: Int, val title: String, val summary: String, 
 data class ActivityDescription(val title: ActivityTitleTwo, val summary: String)
 
 
-fun Activity.updateDescription(title: String, summary: String): ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>> {
+fun Activity.updateDescription(title: String, summary: String): ValidatedNel<ValidationError, CommandResult<Activity, ActivityDescriptionUpdated>> {
     return validate(title, summary) { t, s ->
         this.copy(description = ActivityDescription(title = t, summary = s))
     }.map { activity ->
-        Result(activity, ActivityDescriptionUpdated(this.id, activity.description.title.value, activity.description.summary))
+        CommandResult(activity, ActivityDescriptionUpdated(this.id, activity.description.title.value, activity.description.summary))
     }
 }
 
-fun Activity.add(resourceId: ResourceId): ValidatedNel<ValidationError, Result<Activity, ActivityResourceAdded>> {
+fun Activity.add(resourceId: ResourceId): ValidatedNel<ValidationError, CommandResult<Activity, ActivityResourceAdded>> {
     return when (this.resources.contains(resourceId)) {
         true -> Invalid(ValidationError.DuplicateActivityResource).toValidatedNel()
         false -> {
             val newResources = this.resources.plus(resourceId)
             val activity = this.copy(resources = newResources)
-            Valid(Result(activity, ActivityResourceAdded(activity.id, resourceId)))
+            Valid(CommandResult(activity, ActivityResourceAdded(activity.id, resourceId)))
         }
     }
 }

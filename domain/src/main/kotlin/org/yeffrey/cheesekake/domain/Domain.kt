@@ -13,11 +13,11 @@ sealed class ValidationError(val message: String) {
     object InvalidUsername: ValidationError("Username is invalid")
     object InvalidPassword: ValidationError("Password is invalid")
     object DuplicateActivityResource : ValidationError("Duplicate resource")
+    object InvalidQuantity : ValidationError()
 }
 
 interface Event
-
-data class Result<T, E : Event>(val result: T, val event: E)
+data class CommandResult<T, E : Event>(val result: T, val event: E)
 
 fun String.isDomainString(maxLength: Int) = this.isMaxLength(maxLength) && this.isNotBlank()
 fun <T> String.toDomainString(maxLength: Int, validationError: ValidationError, block: (s: String) -> T): ValidatedNel<ValidationError, T> {
@@ -27,8 +27,10 @@ fun <T> String.toDomainString(maxLength: Int, validationError: ValidationError, 
     }
 }
 
-class NonEmptySet<T>(element: T, private val delegate: MutableSet<T> = HashSet()) : MutableSet<T> by delegate {
-    init {
-        this.add(element)
+fun Int.isQuantity() = this >= 0
+fun <T> Int.toQuantity(validationError: ValidationError, block: (s: Int) -> T): ValidatedNel<ValidationError, T> {
+    return when (this.isQuantity()) {
+        true -> Valid((block(this)))
+        else -> Invalid(Nel(validationError))
     }
 }

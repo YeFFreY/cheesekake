@@ -1,14 +1,22 @@
 package org.yeffrey.cheesekake.domain.activities.entities
 
 import arrow.data.*
-import org.yeffrey.cheesekake.domain.NonEmptySet
-import org.yeffrey.cheesekake.domain.ValidationError
-import org.yeffrey.cheesekake.domain.toDomainString
+import org.yeffrey.cheesekake.domain.*
+
+data class ActivityCreatedTwo(val id: Int, val title: String, val summary: String) : Event
+data class ActivityDetailsCorrected(val id: Int, val title: String, val summary: String) : Event
+data class ActivityResourceAddedTwo(val id: Int, val resourceId: Int, val qty: Int) : Event
 
 enum class TrainingLevel {
     Low,
     Normal,
     Hard
+}
+
+data class Quantity internal constructor(val value: Int) {
+    companion object {
+        fun from(value: Int): ValidatedNel<ValidationError, Quantity> = value.toQuantity(ValidationError.InvalidQuantity, ::Quantity)
+    }
 }
 
 data class ResourceName internal constructor(val value: String) {
@@ -62,36 +70,52 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
             }.fix()
         }
 
-        fun new(id: Int, title: String, summary: String): ValidatedNel<ValidationError, ActivityDetails> {
+        fun new(id: Int, title: String, summary: String): ValidatedNel<ValidationError, CommandResult<ActivityDetails, ActivityCreatedTwo>> {
             return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
                 ActivityDetails(id, titleValue, summaryValue)
+            }.map {
+                CommandResult(it, ActivityCreatedTwo(it.id, it.title.value, it.summary.value))
             }
         }
     }
 
-    fun updateActivityDetails(activityDetails: ActivityDetails, title: String, summary: String): ValidatedNel<ValidationError, ActivityDetails> {
+    fun updateActivityDetails(activityDetails: ActivityDetails, title: String, summary: String): ValidatedNel<ValidationError, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
         return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
             activityDetails.copy(title = titleValue, summary = summaryValue)
+        }.map {
+            CommandResult(it, ActivityDetailsCorrected(it.id, it.title.value, it.summary.value))
         }
     }
 }
 
-data class ActivityResource constructor(val resource: Resource) {
-    var qty: Int = 0
+data class ActivityResource constructor(val resourceId: Int) {
+    val qty: Quantity = Quantity(0)
+
+    companion object {
+        fun from(resourceId: Int, quantity: Int): ValidatedNel<ValidationError, ActivityResource> = quantity.toQuantity(ValidationError.InvalidQuantity, ::Quantity).map { ActivityResource(resourceId) }
+    }
 }
 
-data class ActivityResourcesRequirement constructor(val id: Int, val resources: NonEmptySet<ActivityResource>)
-
-data class TrainedSkill constructor(val skill: Skill) {
-    var level = TrainingLevel.Normal
+data class ActivityResourcesRequirement constructor(val id: Int, val resources: Set<ActivityResource> = emptySet()) {
+    fun add(resource: ActivityResource): ValidatedNel<ValidationError, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>> {
+        val mutableResources = this.resources.toMutableSet()
+        if (!mutableResources.add(resource)) {
+            return Invalid(ValidationError.DuplicateActivityResource).toValidatedNel()
+        }
+        return Valid(CommandResult(this.copy(resources = mutableResources.toSet()), ActivityResourceAddedTwo(this.id, resource.resourceId, resource.qty.value)))
+    }
 }
 
-data class ActivityTrainedSkills constructor(val id: Int, val skills: NonEmptySet<TrainedSkill>)
-
-data class RequiredSkill constructor(val skill: Skill) {
-    var level = TrainingLevel.Normal
+data class TrainedSkill constructor(val skillId: Int) {
+    val level = TrainingLevel.Normal
 }
 
-data class ActivitySkillsRequirement(val id: Int, val skills: NonEmptySet<RequiredSkill>)
+data class ActivityTrainedSkills constructor(val id: Int, val skills: Set<TrainedSkill> = emptySet())
+
+data class RequiredSkill constructor(val skillId: Int) {
+    val level = TrainingLevel.Normal
+}
+
+data class ActivitySkillsRequirement(val id: Int, val skills: Set<RequiredSkill> = emptySet())
 
 
