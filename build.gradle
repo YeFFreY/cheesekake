@@ -23,7 +23,7 @@ ext {
     ktor_version = '1.0.0-beta-3'
     jooq_version = '3.11.5'
     postgres_version = '42.2.5'
-    arrow_version = '0.7.3'
+    arrow_version = '0.8.0'
 }
 
 allprojects {
@@ -49,6 +49,7 @@ subprojects {
         compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
         compile 'ch.qos.logback:logback-classic:1.2.3'
         compile "io.arrow-kt:arrow-core:$arrow_version"
+        compile "io.arrow-kt:arrow-validation:$arrow_version"
         compile "io.arrow-kt:arrow-syntax:$arrow_version"
         compile "io.arrow-kt:arrow-typeclasses:$arrow_version"
         compile "io.arrow-kt:arrow-data:$arrow_version"

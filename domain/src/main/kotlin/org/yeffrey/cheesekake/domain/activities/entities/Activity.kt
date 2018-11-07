@@ -1,8 +1,12 @@
 package org.yeffrey.cheesekake.domain.activities.entities
 
+/*
+
 
 import arrow.core.Option
 import arrow.data.*
+import arrow.instances.nonemptylist.semigroup.semigroup
+import arrow.instances.validated.applicative.applicative
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.Event
 import org.yeffrey.cheesekake.domain.ValidationError
@@ -87,3 +91,4 @@ private fun validate(title: String, summary: String, block: (ActivityTitleTwo, S
     }.fix()
 
 }
+*/

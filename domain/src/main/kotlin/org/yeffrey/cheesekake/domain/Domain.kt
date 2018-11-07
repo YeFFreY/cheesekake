@@ -1,6 +1,6 @@
 package org.yeffrey.cheesekake.domain
 
-import arrow.data.*
+import arrow.core.Either
 import org.yeffrey.core.utils.isMaxLength
 
 sealed class ValidationError(val message: String) {
@@ -13,24 +13,24 @@ sealed class ValidationError(val message: String) {
     object InvalidUsername: ValidationError("Username is invalid")
     object InvalidPassword: ValidationError("Password is invalid")
     object DuplicateActivityResource : ValidationError("Duplicate resource")
-    object InvalidQuantity : ValidationError()
+    object InvalidQuantity : ValidationError("Invalid value for Quantity")
 }
 
 interface Event
 data class CommandResult<T, E : Event>(val result: T, val event: E)
 
 fun String.isDomainString(maxLength: Int) = this.isMaxLength(maxLength) && this.isNotBlank()
-fun <T> String.toDomainString(maxLength: Int, validationError: ValidationError, block: (s: String) -> T): ValidatedNel<ValidationError, T> {
+fun <T> String.toDomainString(maxLength: Int, validationError: ValidationError, block: (s: String) -> T): Either<ValidationError, T> {
     return when (this.isDomainString(maxLength)) {
-        true -> Valid((block(this)))
-        else -> Invalid(Nel(validationError))
+        true -> Either.right((block(this)))
+        else -> Either.left(validationError)
     }
 }
 
 fun Int.isQuantity() = this >= 0
-fun <T> Int.toQuantity(validationError: ValidationError, block: (s: Int) -> T): ValidatedNel<ValidationError, T> {
+fun <T> Int.toQuantity(validationError: ValidationError, block: (s: Int) -> T): Either<ValidationError, T> {
     return when (this.isQuantity()) {
-        true -> Valid((block(this)))
-        else -> Invalid(Nel(validationError))
+        true -> Either.right(block(this))
+        else -> Either.left(validationError)
     }
 }

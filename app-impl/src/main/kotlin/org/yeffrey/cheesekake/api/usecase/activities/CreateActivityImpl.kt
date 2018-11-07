@@ -1,25 +1,22 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
-import arrow.data.Invalid
-import arrow.data.Valid
-import arrow.data.ValidatedNel
+import arrow.core.Either
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
-import org.yeffrey.cheesekake.domain.Result
+import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreated
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityId
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreatedTwo
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : CreateActivity {
     override suspend fun handle(request: CreateActivity.Request, presenter: CreateActivity.Presenter) = mustBeAuthenticated(request, presenter) {
         val newActivityId = activityGateway.nextIdentity()
         val newActivity = request.toDomain(newActivityId)
         when (newActivity) {
-            is Valid -> presenter.success(activityGateway.activityCreated(newActivity.a.event))
-            is Invalid -> presenter.validationFailed(newActivity.e.all)
+            is Either.Right -> presenter.success(activityGateway.activityCreated(newActivity.b.event))
+            is Either.Left -> presenter.validationFailed(newActivity.a)
         }
     }
 }
 
-fun CreateActivity.Request.toDomain(newId: ActivityId): ValidatedNel<ValidationError, Result<Activity, ActivityCreated>> = Activity.new(newId, this.title, this.summary)
+fun CreateActivity.Request.toDomain(newId: Int): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityCreatedTwo>> = ActivityDetails.new(newId, this.title, this.summary)
