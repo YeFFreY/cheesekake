@@ -1,15 +1,12 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
-import arrow.data.Invalid
-import arrow.data.Valid
-import arrow.data.ValidatedNel
+import arrow.core.Either
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
-import org.yeffrey.cheesekake.domain.Result
+import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityDescriptionUpdated
-import org.yeffrey.cheesekake.domain.activities.entities.updateDescription
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetailsCorrected
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
     override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
@@ -21,14 +18,14 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
         }
     }
 
-    private suspend fun process(result: ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>>, presenter: UpdateActivity.Presenter) {
+    private suspend fun process(result: Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>>, presenter: UpdateActivity.Presenter) {
         when (result) {
-            is Valid -> presenter.success(activityGateway.descriptionUpdated(result.a.event))
-            is Invalid -> presenter.validationFailed(result.e.all)
+            is Either.Left -> presenter.validationFailed(result.a)
+            is Either.Right -> presenter.success(activityGateway.descriptionUpdated(result.b.event))
         }
     }
 
 
 }
 
-fun UpdateActivity.Request.toDomain(activity: Activity): ValidatedNel<ValidationError, Result<Activity, ActivityDescriptionUpdated>> = activity.updateDescription(this.title, this.summary)
+fun UpdateActivity.Request.toDomain(activity: ActivityDetails): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> = activity.updateActivityDetails(this.title, this.summary)

@@ -13,8 +13,8 @@ class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : C
         val newActivityId = activityGateway.nextIdentity()
         val newActivity = request.toDomain(newActivityId)
         when (newActivity) {
-            is Either.Right -> presenter.success(activityGateway.activityCreated(newActivity.b.event))
             is Either.Left -> presenter.validationFailed(newActivity.a)
+            is Either.Right -> presenter.success(activityGateway.activityCreated(newActivity.b.event))
         }
     }
 }

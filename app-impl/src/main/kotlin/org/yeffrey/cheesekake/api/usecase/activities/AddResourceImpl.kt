@@ -1,15 +1,14 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
-import arrow.data.Invalid
-import arrow.data.Valid
-import arrow.data.ValidatedNel
+import arrow.core.Either
+import arrow.core.flatMap
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
-import org.yeffrey.cheesekake.domain.Result
+import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.Activity
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAdded
-import org.yeffrey.cheesekake.domain.activities.entities.add
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityResource
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAddedTwo
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourcesRequirement
 
 class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) : AddResource {
     override suspend fun handle(request: AddResource.Request, presenter: AddResource.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
@@ -25,13 +24,18 @@ class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) 
         }
     }
 
-    private suspend fun process(result: ValidatedNel<ValidationError, Result<Activity, ActivityResourceAdded>>, presenter: AddResource.Presenter) {
+    private suspend fun process(result: Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>>, presenter: AddResource.Presenter) {
         when (result) {
-            is Valid -> presenter.success(activityGateway.resourceAdded(result.a.event))
-            is Invalid -> presenter.validationFailed(result.e.all)
+            is Either.Left -> presenter.validationFailed(result.a)
+            is Either.Right -> presenter.success(activityGateway.resourceAdded(result.b.event))
         }
     }
 }
 
-fun AddResource.Request.toDomain(activity: Activity): ValidatedNel<ValidationError, Result<Activity, ActivityResourceAdded>> = activity.add(this.resourceId)
+fun AddResource.Request.toDomain(activity: ActivityResourcesRequirement): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>> {
+    return ActivityResource.from(this.resourceId, this.quantity).flatMap {
+        activity.add(it)
+    }
+}
+
 

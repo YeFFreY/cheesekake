@@ -1,6 +1,7 @@
 package org.yeffrey.cheesekake.domain.activities.entities
 
 import arrow.core.Either
+import arrow.core.right
 import arrow.validation.validate
 import org.yeffrey.cheesekake.domain.*
 
@@ -23,6 +24,7 @@ fun main(args: Array<String>) {
     }
     println(r)
 }
+
 data class Quantity internal constructor(val value: Int) {
     companion object {
         fun from(value: Int): Either<ValidationError, Quantity> = value.toQuantity(ValidationError.InvalidQuantity, ::Quantity)
@@ -86,9 +88,9 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
         }
     }
 
-    fun updateActivityDetails(activityDetails: ActivityDetails, title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
+    fun updateActivityDetails(title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
         return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
-            activityDetails.copy(title = titleValue, summary = summaryValue)
+            this.copy(title = titleValue, summary = summaryValue)
         }.map {
             CommandResult(it, ActivityDetailsCorrected(it.id, it.title.value, it.summary.value))
         }
@@ -96,20 +98,27 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
 }
 
 data class ActivityResource constructor(val resourceId: Int) {
-    val qty: Quantity = Quantity(0)
+    var qty: Quantity = Quantity(0)
 
     companion object {
-        fun from(resourceId: Int, quantity: Int): Either<ValidationError, ActivityResource> = quantity.toQuantity(ValidationError.InvalidQuantity, ::Quantity).map { ActivityResource(resourceId) }
+        fun from(resourceId: Int, quantity: Int): Either<List<ValidationError>, ActivityResource> {
+            val qty = quantity.toQuantity(ValidationError.InvalidQuantity, ::Quantity)
+            return validate(qty, Either.right()) { validQty, _ ->
+                val resource = ActivityResource(resourceId)
+                resource.qty = validQty
+                resource
+            }
+        }
     }
 }
 
 
 data class ActivityResourcesRequirement constructor(val id: Int, val resources: Set<ActivityResource> = emptySet()) {
-    fun add(resource: ActivityResource): Either<ValidationError, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>> {
+    fun add(resource: ActivityResource): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>> {
         val mutableResources = this.resources.toMutableSet()
         return when (mutableResources.add(resource)) {
             true -> Either.right(CommandResult(this.copy(resources = mutableResources.toSet()), ActivityResourceAddedTwo(this.id, resource.resourceId, resource.qty.value)))
-            false -> Either.left(ValidationError.DuplicateActivityResource)
+            false -> Either.left(listOf(ValidationError.DuplicateActivityResource))
         }
     }
 
