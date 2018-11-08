@@ -5,7 +5,7 @@ import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreatedTwo
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreated
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : CreateActivity {
@@ -19,4 +19,4 @@ class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : C
     }
 }
 
-fun CreateActivity.Request.toDomain(newId: Int): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityCreatedTwo>> = ActivityDetails.new(newId, this.title, this.summary)
+fun CreateActivity.Request.toDomain(newId: Int): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityCreated>> = ActivityDetails.new(newId, this.title, this.summary)

@@ -7,7 +7,7 @@ import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResource
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAddedTwo
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAdded
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourcesRequirement
 
 class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) : AddResource {
@@ -24,7 +24,7 @@ class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) 
         }
     }
 
-    private suspend fun process(result: Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>>, presenter: AddResource.Presenter) {
+    private suspend fun process(result: Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAdded>>, presenter: AddResource.Presenter) {
         when (result) {
             is Either.Left -> presenter.validationFailed(result.a)
             is Either.Right -> presenter.success(activityGateway.resourceAdded(result.b.event))
@@ -32,7 +32,7 @@ class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) 
     }
 }
 
-fun AddResource.Request.toDomain(activity: ActivityResourcesRequirement): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAddedTwo>> {
+fun AddResource.Request.toDomain(activity: ActivityResourcesRequirement): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAdded>> {
     return ActivityResource.from(this.resourceId, this.quantity).flatMap {
         activity.add(it)
     }

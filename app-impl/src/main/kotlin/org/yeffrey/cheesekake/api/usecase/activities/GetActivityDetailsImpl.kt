@@ -1,7 +1,7 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
 import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
-import org.yeffrey.cheesekake.domain.activities.query.ActivityDetails
+import org.yeffrey.cheesekake.domain.activities.query.ActivityDetailsProjection
 
 class GetActivityDetailsImpl(private val activityGateway: QueryActivityGateway) : GetActivityDetails {
     override suspend fun handle(request: GetActivityDetails.Request, presenter: GetActivityDetails.Presenter) {
@@ -11,6 +11,9 @@ class GetActivityDetailsImpl(private val activityGateway: QueryActivityGateway) 
     }
 }
 
-fun ActivityDetails.toPresenterModel(): GetActivityDetails.Presenter.ActivityDetails {
-    return GetActivityDetails.Presenter.ActivityDetails(this.id, this.title, this.summary, this.resources, this.skills)
+fun ActivityDetailsProjection.toPresenterModel(): GetActivityDetails.Presenter.ActivityDetails {
+    val resources = this.resources.map {
+        GetActivityDetails.Presenter.ActivityResource(it.resourceId, it.quantity)
+    }
+    return GetActivityDetails.Presenter.ActivityDetails(this.id, this.title, this.summary, resources, this.skills)
 }

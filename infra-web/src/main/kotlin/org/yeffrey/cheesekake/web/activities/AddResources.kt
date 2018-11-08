@@ -6,9 +6,9 @@ import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.AddResource
 import org.yeffrey.cheesekake.domain.ValidationError
 
-data class AddResourceDto(val resourceId: Int)
+data class AddResourceDto(val resourceId: Int, val quantity: Int)
 
-fun AddResourceDto.toRequest(activityId: Int, userId: Int): AddResource.Request = AddResource.Request(userId, activityId, resourceId)
+fun AddResourceDto.toRequest(activityId: Int, userId: Int): AddResource.Request = AddResource.Request(userId, activityId, resourceId, quantity)
 
 class AddResourcePresenter(private val call: ApplicationCall) : AddResource.Presenter {
     override suspend fun validationFailed(errors: List<ValidationError>) {

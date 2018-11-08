@@ -41,7 +41,8 @@ POST http://localhost:{{port}}/api/activities/2/resources
 Content-Type: application/json
 
 {
-  "resourceId": 4
+  "resourceId": 2,
+  "quantity": 15
 }
 
 ###
