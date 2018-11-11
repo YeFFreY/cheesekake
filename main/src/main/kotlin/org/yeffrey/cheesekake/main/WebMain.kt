@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.main
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import io.ktor.application.Application
 import io.ktor.application.install
 import io.ktor.features.CORS
@@ -43,13 +44,16 @@ fun Application.main() {
     install(CallLogging)
     install(CORS) {
         method(HttpMethod.Options)
+        method(HttpMethod.Put)
         host("*")
     }
     install(Sessions) {
         cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true))
     }
     install(ContentNegotiation) {
-        jackson { }
+        jackson {
+            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+        }
     }
     install(Routing) {
         route("/api") {

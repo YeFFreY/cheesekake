@@ -7,7 +7,7 @@ import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivity
 import org.yeffrey.cheesekake.domain.ValidationError
 
 
-data class UpdateActivityDto(val title: String, val summary: String)
+data class UpdateActivityDto(val title: String = "", val summary: String = "")
 
 fun UpdateActivityDto.toRequest(userId: Int, activityId: Int): UpdateActivity.Request = UpdateActivity.Request(userId, activityId, this.title, this.summary)
 

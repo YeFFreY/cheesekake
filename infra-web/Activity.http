@@ -13,6 +13,15 @@ Content-Type: application/json
 }
 
 ###
+POST http://localhost:{{port}}/api/activities
+Content-Type: application/json
+
+{
+  "title": "",
+  "summary": ""
+}
+
+###
 
 GET http://localhost:{{port}}/api/activities?titleContains=foot
 Accept: application/json

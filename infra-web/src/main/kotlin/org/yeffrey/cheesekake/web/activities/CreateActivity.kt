@@ -6,7 +6,7 @@ import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.domain.ValidationError
 
-data class CreateActivityDto(val title: String, val summary: String)
+data class CreateActivityDto(val title: String = "", val summary: String = "")
 
 fun CreateActivityDto.toRequest(userId: Int): CreateActivity.Request = CreateActivity.Request(userId, this.title, this.summary)
 
