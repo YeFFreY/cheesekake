@@ -3,6 +3,7 @@ package org.yeffrey.cheesekake.main
 import com.fasterxml.jackson.databind.DeserializationFeature
 import io.ktor.application.Application
 import io.ktor.application.install
+import io.ktor.auth.*
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
@@ -14,15 +15,14 @@ import io.ktor.routing.route
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.sessions.Sessions
-import io.ktor.sessions.cookie
-import io.ktor.sessions.directorySessionStorage
+import io.ktor.sessions.*
 import org.yeffrey.cheesekake.api.usecase.activities.*
 import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.activities.ActivityGatewayImpl
 import org.yeffrey.cheesekake.persistence.users.UserGatewayImpl
 import org.yeffrey.cheesekake.web.CheeseKakeSesion
+import org.yeffrey.cheesekake.web.CheesePrincipal
 import org.yeffrey.cheesekake.web.activities.activities
 import org.yeffrey.cheesekake.web.users.users
 import java.io.File
@@ -40,6 +40,22 @@ fun Application.main() {
     val addResource = AddResourceImpl(activityGateway)
     val registerUser = RegisterUserImpl(userGateway)
 
+    install(Authentication) {
+        form("login") {
+            validate { credentials ->
+                userGateway.login(credentials.name, credentials.password).fold({ null }) {
+                    CheesePrincipal(it)
+                }
+            }
+        }
+        session<CheeseKakeSesion>("authenticated") {
+            challenge = SessionAuthChallenge.Unauthorized
+            validate {
+                val session = this.sessions.get<CheeseKakeSesion>()
+                session?.userId?.let { userId -> CheesePrincipal(userId) }
+            }
+        }
+    }
     install(DefaultHeaders)
     install(CallLogging)
     install(CORS) {
@@ -56,10 +72,13 @@ fun Application.main() {
         }
     }
     install(Routing) {
-        route("/api") {
-            activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource)
-            users(registerUser)
+        authenticate("authenticated") {
+            route("/api") {
+                activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource)
+            }
         }
+        users(registerUser)
+
     }
 }
 

@@ -48,6 +48,7 @@ subprojects {
         compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8"
         compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
         compile 'ch.qos.logback:logback-classic:1.2.3'
+        compile 'org.mindrot:jbcrypt:0.4'
         compile "io.arrow-kt:arrow-core:$arrow_version"
         compile "io.arrow-kt:arrow-validation:$arrow_version"
         compile "io.arrow-kt:arrow-syntax:$arrow_version"
@@ -160,6 +161,7 @@ project("infra-web") {
 
         compile "io.ktor:ktor-server-netty:$ktor_version"
         compile "io.ktor:ktor-jackson:$ktor_version"
+        compile "io.ktor:ktor-auth:$ktor_version"
         compile "io.ktor:ktor-server-sessions:$ktor_version"
 
     }

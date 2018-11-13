@@ -4,12 +4,23 @@
 # * 'gtrp' and 'gtr' create a GET request with or without query parameters;
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
-POST http://localhost:{{port}}/api/users/registration
+POST http://localhost:{{port}}/users/registration
 Content-Type: application/json
 
 {
-  "username": "johndoe6",
-  "password": "password123"
+  "username": "bob",
+  "password": "bob123"
 }
+
+###
+POST http://localhost:{{port}}/users/login
+Content-Type: application/x-www-form-urlencoded
+
+user=bob&password=bob123
+
+> {%
+client.assert(response.status === 302, "invalid status code returned");
+client.global.set("cookie_session", response.headers.valueOf("Set-Cookie"));
+ %}
 
 ###

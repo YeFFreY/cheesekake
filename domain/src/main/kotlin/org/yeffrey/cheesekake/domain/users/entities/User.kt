@@ -27,7 +27,7 @@ fun String.toPassword() : ValidatedNel<ValidationError, Password> {
 }
 
 private fun validPassword(value: String) : Boolean {
-    return value.isNotBlank() && value.isMaxLength(72) && value.isMinLength(10)
+    return value.isNotBlank() && value.isMaxLength(72) && value.isMinLength(6)
 }
 
 data class Credentials(val username: Username, val password: Password)
