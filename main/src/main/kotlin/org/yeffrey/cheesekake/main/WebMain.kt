@@ -2,20 +2,24 @@ package org.yeffrey.cheesekake.main
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import io.ktor.application.Application
+import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.*
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.features.DefaultHeaders
+import io.ktor.html.respondHtml
 import io.ktor.http.HttpMethod
 import io.ktor.jackson.jackson
 import io.ktor.routing.Routing
+import io.ktor.routing.get
 import io.ktor.routing.route
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.sessions.*
+import kotlinx.html.*
 import org.yeffrey.cheesekake.api.usecase.activities.*
 import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
@@ -59,6 +63,7 @@ fun Application.main() {
     install(DefaultHeaders)
     install(CallLogging)
     install(CORS) {
+        allowCredentials = true
         method(HttpMethod.Options)
         method(HttpMethod.Put)
         host("*")
@@ -72,6 +77,26 @@ fun Application.main() {
         }
     }
     install(Routing) {
+        route("/") {
+            get {
+                call.respondHtml {
+                    head {
+                        title { +"Cheesekake" }
+                    }
+                    body {
+                        h1 {
+                            +"Welcome"
+                        }
+                        p {
+                            +"Welcome on Cheesekake"
+                        }
+                        a("/users/login") {
+                            +"Login"
+                        }
+                    }
+                }
+            }
+        }
         authenticate("authenticated") {
             route("/api") {
                 activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource)
