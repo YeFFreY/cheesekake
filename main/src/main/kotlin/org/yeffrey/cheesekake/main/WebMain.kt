@@ -55,8 +55,7 @@ fun Application.main() {
         session<CheeseKakeSesion>("authenticated") {
             challenge = SessionAuthChallenge.Unauthorized
             validate {
-                val session = this.sessions.get<CheeseKakeSesion>()
-                session?.userId?.let { userId -> CheesePrincipal(userId) }
+                this.sessions.get<CheeseKakeSesion>()?.userId?.let { userId -> CheesePrincipal(userId) }
             }
         }
     }
@@ -69,7 +68,9 @@ fun Application.main() {
         host("*")
     }
     install(Sessions) {
-        cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true))
+        cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true)) {
+            cookie.path = "/"
+        }
     }
     install(ContentNegotiation) {
         jackson {
