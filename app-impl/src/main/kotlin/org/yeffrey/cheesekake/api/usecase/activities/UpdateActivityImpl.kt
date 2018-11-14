@@ -7,13 +7,15 @@ import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetailsCorrected
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityPolicies
+import org.yeffrey.cheesekake.domain.respect
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
     override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
         activityGateway.getDescription(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-            when (true) {
-                false -> presenter.accessDenied()
+            when (respect(userId, activity, ActivityPolicies.IsAuthor)) {
                 true -> process(request.toDomain(activity), presenter)
+                false -> presenter.accessDenied()
             }
         }
     }

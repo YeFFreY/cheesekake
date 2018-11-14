@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.web.activities
 
+import arrow.core.Option
 import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
@@ -9,7 +10,7 @@ import org.yeffrey.cheesekake.domain.ValidationError
 
 data class UpdateActivityDto(val title: String = "", val summary: String = "")
 
-fun UpdateActivityDto.toRequest(userId: Int, activityId: Int): UpdateActivity.Request = UpdateActivity.Request(userId, activityId, this.title, this.summary)
+fun UpdateActivityDto.toRequest(userId: Option<Int>, activityId: Int): UpdateActivity.Request = UpdateActivity.Request(userId, activityId, this.title, this.summary)
 
 class UpdateActivityPresenter(private val call: ApplicationCall) : UpdateActivity.Presenter {
     override suspend fun accessDenied() {

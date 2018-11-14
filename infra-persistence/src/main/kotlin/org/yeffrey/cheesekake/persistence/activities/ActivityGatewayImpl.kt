@@ -46,7 +46,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()
         Option.fromNullable(record).flatMap { activity ->
-            val memento = ActivityDetailsMemento(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY])
+            val memento = ActivityDetailsMemento(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], activity[ACTIVITIES.AUTHOR_ID])
             ActivityDetails.from(memento)
         }
     }
@@ -61,9 +61,14 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun getResources(id: Int): Option<ActivityResourcesRequirement> = dbQuery {
-        val memento = it.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITY_RESOURCES.QUANTITY).from(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { activityResource ->
+        val activityAuthor = it.select(ACTIVITIES.AUTHOR_ID).from(ACTIVITIES).where(ACTIVITIES.ID.eq(id)).fetchOne()?.get(ACTIVITIES.AUTHOR_ID)
+                ?: return@dbQuery Option.empty()
+
+        val memento = it.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITY_RESOURCES.QUANTITY)
+                .from(ACTIVITY_RESOURCES)
+                .where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { activityResource ->
             ActivityResource.from(activityResource[ACTIVITY_RESOURCES.RESOURCE_ID], activityResource[ACTIVITY_RESOURCES.QUANTITY]).toOption()
-        }.fold(ActivityResourcesRequirementMemento(id)) { acc, resource ->
+                }.fold(ActivityResourcesRequirementMemento(id = id, authorId = activityAuthor)) { acc, resource ->
             when (resource) {
                 is Some -> {
                     acc.resources.add(resource.t)

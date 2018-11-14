@@ -7,7 +7,7 @@ import arrow.core.toOption
 import arrow.validation.validate
 import org.yeffrey.cheesekake.domain.*
 
-data class ActivityCreated(val id: Int, val title: String, val summary: String) : Event
+data class ActivityCreated(val id: Int, val title: String, val summary: String, val authorId: Int) : Event
 data class ActivityDetailsCorrected(val id: Int, val title: String, val summary: String) : Event
 data class ActivityResourceAdded(val id: Int, val resourceId: Int, val quantity: Int) : Event
 data class ActivityResourceRemoved(val id: Int, val resourceId: Int) : Event
@@ -25,6 +25,10 @@ fun main(args: Array<String>) {
         Resource(1, a, b)
     }
     println(r)
+}
+
+interface Activity {
+    val authorId: Int
 }
 
 data class Quantity internal constructor(val value: Int) {
@@ -61,52 +65,6 @@ data class SkillDescription internal constructor(val value: String) {
 
 data class Skill constructor(val id: Int, val name: SkillName, val description: SkillDescription)
 
-data class ActivityTitleTwo internal constructor(val value: String) {
-    companion object {
-        fun from(value: String): Either<ValidationError, ActivityTitleTwo> = value.toDomainString(250, ValidationError.InvalidActivityTitle, ::ActivityTitleTwo)
-    }
-}
-
-data class ActivitySummary internal constructor(val value: String) {
-    companion object {
-        fun from(value: String): Either<ValidationError, ActivitySummary> = value.toDomainString(250, ValidationError.InvalidActivitySummary, ::ActivitySummary)
-    }
-}
-
-data class ActivityDetailsMemento(val id: Int, val title: String, val summary: String)
-data class ActivityDetails internal constructor(val id: Int, val title: ActivityTitleTwo, val summary: ActivitySummary) {
-    companion object {
-        private fun build(title: String, summary: String, block: (ActivityTitleTwo, ActivitySummary) -> ActivityDetails): Either<List<ValidationError>, ActivityDetails> {
-            val t = ActivityTitleTwo.from(title)
-            val s = ActivitySummary.from(summary)
-            return validate(t, s, block)
-        }
-
-        fun from(memento: ActivityDetailsMemento): Option<ActivityDetails> {
-            return ActivityDetails.build(memento.title, memento.summary) { title, summary ->
-                ActivityDetails(memento.id, title, summary)
-            }.toOption()
-        }
-
-        fun new(id: Int, title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityCreated>> {
-            return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
-                ActivityDetails(id, titleValue, summaryValue)
-            }.map {
-                CommandResult(it, ActivityCreated(it.id, it.title.value, it.summary.value))
-            }
-        }
-
-    }
-
-    fun updateActivityDetails(title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
-        return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
-            this.copy(title = titleValue, summary = summaryValue)
-        }.map {
-            CommandResult(it, ActivityDetailsCorrected(it.id, it.title.value, it.summary.value))
-        }
-    }
-}
-
 data class ActivityResource constructor(val resourceId: Int) {
     var qty: Quantity = Quantity(0)
 
@@ -122,11 +80,11 @@ data class ActivityResource constructor(val resourceId: Int) {
     }
 }
 
-data class ActivityResourcesRequirementMemento(val id: Int, val resources: MutableSet<ActivityResource> = mutableSetOf())
-data class ActivityResourcesRequirement internal constructor(val id: Int, val resources: Set<ActivityResource> = emptySet()) {
+data class ActivityResourcesRequirementMemento(val id: Int, val resources: MutableSet<ActivityResource> = mutableSetOf(), val authorId: Int)
+data class ActivityResourcesRequirement internal constructor(val id: Int, val resources: Set<ActivityResource> = emptySet(), override val authorId: Int) : Activity {
     companion object {
         fun from(memento: ActivityResourcesRequirementMemento): Option<ActivityResourcesRequirement> {
-            return ActivityResourcesRequirement(memento.id, memento.resources.toSet()).toOption()
+            return ActivityResourcesRequirement(memento.id, memento.resources.toSet(), memento.authorId).toOption()
         }
     }
 

@@ -6,15 +6,17 @@ import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
+import org.yeffrey.cheesekake.domain.activities.entities.ActivityPolicies
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResource
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAdded
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourcesRequirement
+import org.yeffrey.cheesekake.domain.respect
 
 class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) : AddResource {
     override suspend fun handle(request: AddResource.Request, presenter: AddResource.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
         if (activityGateway.exists(request.resourceId)) {
             activityGateway.getResources(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-                when (true) {
+                when (respect(userId, activity, ActivityPolicies.IsAuthor)) {
                     false -> presenter.accessDenied()
                     true -> process(request.toDomain(activity), presenter)
                 }

@@ -3,5 +3,7 @@ CREATE TABLE activities (
 	title varchar NOT NULL,
 	summary varchar NOT NULL,
 	published bool NOT NULL DEFAULT false,
-	CONSTRAINT pk_activities PRIMARY KEY (id)
+	author_id integer not null,
+	CONSTRAINT pk_activities PRIMARY KEY (id),
+	CONSTRAINT fk_activities_author FOREIGN KEY (author_id) REFERENCES users(id)
 );
