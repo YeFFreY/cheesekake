@@ -1,23 +1,20 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
 import arrow.core.Either
-import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
+import arrow.core.Option
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetailsCorrected
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityPolicies
-import org.yeffrey.cheesekake.domain.respect
 
-class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
-    override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
-        activityGateway.getDescription(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-            when (respect(userId, activity, ActivityPolicies.IsAuthor)) {
-                true -> process(request.toDomain(activity), presenter)
-                false -> presenter.accessDenied()
-            }
-        }
+class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity() {
+    override suspend fun perform(activity: ActivityDetails, request: Request, presenter: Presenter) {
+        process(request.toDomain(activity), presenter)
+    }
+
+    override suspend fun retrieveAggregate(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter): Option<ActivityDetails> {
+        return activityGateway.getDescription(request.activityId)
     }
 
     private suspend fun process(result: Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>>, presenter: UpdateActivity.Presenter) {

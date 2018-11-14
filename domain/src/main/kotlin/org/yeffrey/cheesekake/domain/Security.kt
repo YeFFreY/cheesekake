@@ -7,16 +7,6 @@ interface Policy<R> {
 }
 
 
-/*
-enum class ActPolicy: Policy<Act> {
-    IsAuthor {
-        override fun enforce(resource: Act, userId: Int): Boolean {
-            return resource.ownedBy == userId
-        }
-    }
-}
-*/
-
 fun <Y> available(policies: List<Policy<Y>>, userId: Int, resource: Y): List<Policy<Y>> {
     return policies.mapNotNull {
         if (it.enforce(resource, userId)) it else null
@@ -25,7 +15,9 @@ fun <Y> available(policies: List<Policy<Y>>, userId: Int, resource: Y): List<Pol
 
 fun <Y> nameOf(policies: List<Policy<Y>>): List<String> = policies.map(Policy<Y>::name)
 
-fun <Y> respect(userId: Int, resource: Y, vararg policies: Policy<Y>): Boolean {
+fun <Y> respect(userId: Int, resource: Y, vararg policies: Policy<Y>): Boolean = respect(userId, resource, policies.toList())
+
+fun <Y> respect(userId: Int, resource: Y, policies: List<Policy<Y>>): Boolean {
     for (policy in policies) {
         if (!policy.enforce(resource, userId)) {
             return false
@@ -33,6 +25,7 @@ fun <Y> respect(userId: Int, resource: Y, vararg policies: Policy<Y>): Boolean {
     }
     return true
 }
+
 /*
 
 fun main(args: Array<String>) {
