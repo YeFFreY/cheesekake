@@ -9,7 +9,7 @@ import org.yeffrey.cheesekake.domain.activities.AddResourcesActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResource
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAdded
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourcesRequirement
-import org.yeffrey.cheesekake.domain.activities.entities.isAuthor
+import org.yeffrey.cheesekake.domain.activities.isAuthor
 import org.yeffrey.cheesekake.domain.respect
 
 class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) : AddResource {

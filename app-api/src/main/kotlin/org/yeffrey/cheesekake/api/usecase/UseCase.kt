@@ -14,3 +14,8 @@ interface UseCasePresenter {
     suspend fun accessDenied()
     suspend fun notFound(id: Int)
 }
+
+data class Action(val name: String)
+interface Resource {
+    val actions: List<Action>
+}

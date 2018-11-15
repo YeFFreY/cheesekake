@@ -7,7 +7,7 @@ import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.activities.UpdateActivityGateway
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetailsCorrected
-import org.yeffrey.cheesekake.domain.activities.entities.isAuthor
+import org.yeffrey.cheesekake.domain.activities.isAuthor
 import org.yeffrey.cheesekake.domain.respect
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {

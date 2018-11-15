@@ -6,6 +6,7 @@ import arrow.core.right
 import arrow.core.toOption
 import arrow.validation.validate
 import org.yeffrey.cheesekake.domain.*
+import org.yeffrey.cheesekake.domain.activities.Activity
 
 data class ActivityCreated(val id: Int, val title: String, val summary: String, val authorId: Int) : Event
 data class ActivityDetailsCorrected(val id: Int, val title: String, val summary: String) : Event
@@ -27,9 +28,6 @@ fun main(args: Array<String>) {
     println(r)
 }
 
-interface Activity {
-    val authorId: Int
-}
 
 data class Quantity internal constructor(val value: Int) {
     companion object {

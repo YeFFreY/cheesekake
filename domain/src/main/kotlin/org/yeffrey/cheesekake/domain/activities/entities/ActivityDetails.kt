@@ -5,6 +5,7 @@ import arrow.core.Option
 import arrow.validation.validate
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
+import org.yeffrey.cheesekake.domain.activities.Activity
 import org.yeffrey.cheesekake.domain.toDomainString
 
 
@@ -53,9 +54,4 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
             CommandResult(it, ActivityDetailsCorrected(it.id, it.title.value, it.summary.value))
         }
     }
-}
-
-
-fun isAuthor(resource: Activity, userId: Int): Boolean {
-    return resource.authorId == userId
 }

@@ -92,11 +92,11 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun query(query: QueryActivitiesGateway.ActivityQueryCriteria): List<ActivitySummaryProjection> = dbQuery {
-        it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES)
                 .where(query.toCondition())
                 .fetch { record ->
-                    ActivitySummaryProjection(record[ACTIVITIES.ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
+                    ActivitySummaryProjection(record[ACTIVITIES.ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY], record[ACTIVITIES.AUTHOR_ID])
                 }
     }
 
