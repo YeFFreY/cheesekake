@@ -1,14 +1,15 @@
 package org.yeffrey.cheesekake.web.activities
 
+import arrow.core.Option
 import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
-import org.yeffrey.cheesekake.domain.ValidationError
+import org.yeffrey.core.error.ErrorDescription
 
 data class CreateActivityDto(val title: String = "", val summary: String = "")
 
-fun CreateActivityDto.toRequest(userId: Int): CreateActivity.Request = CreateActivity.Request(userId, this.title, this.summary)
+fun CreateActivityDto.toRequest(userId: Option<Int>): CreateActivity.Request = CreateActivity.Request(userId, this.title, this.summary)
 
 class CreateActivityPresenter(private val call: ApplicationCall) : CreateActivity.Presenter {
     override suspend fun notFound(id: Int) {
@@ -19,7 +20,7 @@ class CreateActivityPresenter(private val call: ApplicationCall) : CreateActivit
         call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "access denied"))
     }
 
-    override suspend fun validationFailed(errors: List<ValidationError>) {
+    override suspend fun validationFailed(errors: List<ErrorDescription>) {
         call.respond(HttpStatusCode.BadRequest, errors)
     }
 

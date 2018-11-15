@@ -5,7 +5,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivity
-import org.yeffrey.cheesekake.domain.ValidationError
+import org.yeffrey.core.error.ErrorDescription
 
 
 data class UpdateActivityDto(val title: String = "", val summary: String = "")
@@ -21,7 +21,7 @@ class UpdateActivityPresenter(private val call: ApplicationCall) : UpdateActivit
         call.respond(HttpStatusCode.NotFound, id)
     }
 
-    override suspend fun validationFailed(errors: List<ValidationError>) {
+    override suspend fun validationFailed(errors: List<ErrorDescription>) {
         call.respond(HttpStatusCode.BadRequest,  errors)
     }
 

@@ -37,7 +37,7 @@ Cookie: {{cookie_session}}
 
 ###
 
-PUT http://localhost:{{port}}/api/activities/2
+PUT http://localhost:{{port}}/api/activities/10
 Content-Type: application/json
 Cookie: {{cookie_session}}
 

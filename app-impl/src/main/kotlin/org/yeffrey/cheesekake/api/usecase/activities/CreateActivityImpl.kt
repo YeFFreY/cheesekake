@@ -11,7 +11,7 @@ import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetails
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway) : CreateActivity {
     override suspend fun handle(request: CreateActivity.Request, presenter: CreateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
         val newActivityId = activityGateway.nextIdentity()
-        val newActivity = request.toDomain(newActivityId, userId)
+        val newActivity = request.toDomain(userId, newActivityId)
         when (newActivity) {
             is Either.Left -> presenter.validationFailed(newActivity.a)
             is Either.Right -> presenter.success(activityGateway.activityCreated(newActivity.b.event))

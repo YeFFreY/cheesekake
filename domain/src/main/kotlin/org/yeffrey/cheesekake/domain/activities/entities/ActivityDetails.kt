@@ -4,7 +4,6 @@ import arrow.core.Either
 import arrow.core.Option
 import arrow.validation.validate
 import org.yeffrey.cheesekake.domain.CommandResult
-import org.yeffrey.cheesekake.domain.Policy
 import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.domain.toDomainString
 
@@ -56,17 +55,7 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
     }
 }
 
-sealed class ActivityPolicy : Policy<Activity> {
-    object IsAuthor : ActivityPolicy() {
-        override val name: String = "BOB"
 
-        override fun enforce(resource: Activity, userId: Int): Boolean {
-            return resource.authorId == userId
-        }
-    }
-}
-
-fun main(args: Array<String>) {
-    val i: Policy<Activity> = ActivityPolicy.IsAuthor
-
+fun isAuthor(resource: Activity, userId: Int): Boolean {
+    return resource.authorId == userId
 }

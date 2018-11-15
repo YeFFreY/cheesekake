@@ -15,7 +15,7 @@ fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActiv
         }
         post {
             val input = call.receive<CreateActivityDto>()
-            createActivity.handle(input.toRequest(5), CreateActivityPresenter(call))
+            createActivity.handle(input.toRequest(withPrincipalId(call)), CreateActivityPresenter(call))
         }
         route("{activityId}") {
             get {

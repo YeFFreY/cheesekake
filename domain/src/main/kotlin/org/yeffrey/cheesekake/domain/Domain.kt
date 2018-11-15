@@ -1,9 +1,10 @@
 package org.yeffrey.cheesekake.domain
 
 import arrow.core.Either
+import org.yeffrey.core.error.ErrorDescription
 import org.yeffrey.core.utils.isMaxLength
 
-sealed class ValidationError(val message: String) {
+sealed class ValidationError(override val message: String) : ErrorDescription {
     object InvalidActivityTitle : ValidationError("Activity title must not be blank and max 250 chars")
     object InvalidActivitySummary : ValidationError("Activity summary must not be blank and max 250 chars")
     object InvalidResourceName : ValidationError("Resource name must not be blank and max 250 chars")

@@ -94,7 +94,7 @@ project(":domain") {
 
 project(":app-api") {
     dependencies {
-        compile project(":domain")
+        compile project(":core")
     }
 }
 

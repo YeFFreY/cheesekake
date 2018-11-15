@@ -34,14 +34,14 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun activityCreated(data: ActivityCreated): Int = dbQuery {
-        it.insertInto(ACTIVITIES, ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
-                .values(data.id, data.title, data.summary)
+        it.insertInto(ACTIVITIES, ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
+                .values(data.id, data.title, data.summary, data.authorId)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }
 
     override suspend fun getDescription(id: Int): Option<ActivityDetails> = dbQuery {
-        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()

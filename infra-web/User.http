@@ -24,3 +24,23 @@ client.global.set("cookie_session", response.headers.valueOf("Set-Cookie"));
  %}
 
 ###
+POST http://localhost:{{port}}/users/registration
+Content-Type: application/json
+
+{
+  "username": "tod",
+  "password": "tod123"
+}
+
+###
+POST http://localhost:{{port}}/users/login
+Content-Type: application/x-www-form-urlencoded
+
+user=tod&password=tod123
+
+> {%
+client.assert(response.status === 302, "invalid status code returned");
+client.global.set("cookie_session", response.headers.valueOf("Set-Cookie"));
+ %}
+
+###

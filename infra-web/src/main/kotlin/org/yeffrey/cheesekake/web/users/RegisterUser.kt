@@ -6,8 +6,8 @@ import io.ktor.response.respond
 import io.ktor.sessions.sessions
 import io.ktor.sessions.set
 import org.yeffrey.cheesekake.api.usecase.users.RegisterUser
-import org.yeffrey.cheesekake.domain.ValidationError
 import org.yeffrey.cheesekake.web.CheeseKakeSesion
+import org.yeffrey.core.error.ErrorDescription
 
 data class RegistrationDto(val username: String, val password: String)
 
@@ -24,7 +24,7 @@ class RegistrationPresenter(private val call: ApplicationCall) : RegisterUser.Pr
         call.respond(HttpStatusCode.Unauthorized, mapOf("error" to "access denied"))
     }
 
-    override suspend fun validationFailed(errors: List<ValidationError>) {
+    override suspend fun validationFailed(errors: List<ErrorDescription>) {
         call.respond(HttpStatusCode.BadRequest, errors)
     }
 

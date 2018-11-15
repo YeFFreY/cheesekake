@@ -5,14 +5,14 @@ import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.AddResource
-import org.yeffrey.cheesekake.domain.ValidationError
+import org.yeffrey.core.error.ErrorDescription
 
 data class AddResourceDto(val resourceId: Int = -1, val quantity: Int = -1)
 
 fun AddResourceDto.toRequest(activityId: Int, userId: Option<Int>): AddResource.Request = AddResource.Request(userId, activityId, resourceId, quantity)
 
 class AddResourcePresenter(private val call: ApplicationCall) : AddResource.Presenter {
-    override suspend fun validationFailed(errors: List<ValidationError>) {
+    override suspend fun validationFailed(errors: List<ErrorDescription>) {
         call.respond(HttpStatusCode.BadRequest, errors)
     }
 
