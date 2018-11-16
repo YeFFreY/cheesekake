@@ -29,6 +29,7 @@ import org.yeffrey.cheesekake.persistence.users.UserGatewayImpl
 import org.yeffrey.cheesekake.web.CheeseKakeSesion
 import org.yeffrey.cheesekake.web.CheesePrincipal
 import org.yeffrey.cheesekake.web.activities.activities
+import org.yeffrey.cheesekake.web.index
 import org.yeffrey.cheesekake.web.users.users
 import java.io.File
 
@@ -102,6 +103,7 @@ fun Application.main() {
         }
         authenticate("authenticated") {
             route("/api") {
+                index()
                 activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource)
             }
         }
