@@ -8,9 +8,7 @@ import org.yeffrey.cheesekake.domain.activities.query.ActivityDetailsProjection
 class GetActivityDetailsImpl(private val activityGateway: QueryActivityGateway) : GetActivityDetails {
     override suspend fun handle(request: GetActivityDetails.Request, presenter: GetActivityDetails.Presenter, userId: Option<Int>) {
         activityGateway.get(request.id).fold({ presenter.notFound(request.id) }) { activity ->
-            val actions = activity.actions.filter {
-                it.value(activity, userId)
-            }.map { Action(it.key) }
+            val actions = activity.availableActionFor(userId).map(::Action)
             presenter.success(activity.toPresenterModel(actions))
         }
     }

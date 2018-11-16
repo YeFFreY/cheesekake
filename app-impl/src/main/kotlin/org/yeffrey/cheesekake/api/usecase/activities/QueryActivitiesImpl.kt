@@ -10,9 +10,7 @@ class QueryActivitiesImpl(private val activitiesGateway: QueryActivitiesGateway)
     override suspend fun handle(request: QueryActivities.Request, presenter: QueryActivities.Presenter, userId: Option<Int>) {
         val result = activitiesGateway.query(QueryActivitiesGateway.ActivityQueryCriteria(request.titleContains.toOption()))
         presenter.success(result.map { activity ->
-            val actions = activity.actions.filter {
-                it.value(activity, userId)
-            }.map { Action(it.key) }
+            val actions = activity.availableActionFor(userId).map(::Action)
             activity.toPresenterModel(actions)
         })
     }
