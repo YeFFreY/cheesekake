@@ -57,7 +57,7 @@ Content-Type: application/json
 Cookie: {{cookie_session}}
 
 {
-  "resourceId": 3,
+  "resourceId": 2,
   "quantity": 15
 }
 
