@@ -4,11 +4,11 @@ import arrow.core.Option
 
 
 interface UseCase<R : UseCaseRequest, P : UseCasePresenter> {
-    suspend fun handle(request: R, presenter: P)
+    suspend fun handle(request: R, presenter: P, userId: Option<Int> = Option.empty())
 }
 
 
-abstract class UseCaseRequest(open val userId: Option<Int> = Option.empty())
+abstract class UseCaseRequest
 
 interface UseCasePresenter {
     suspend fun accessDenied()
@@ -17,5 +17,6 @@ interface UseCasePresenter {
 
 data class Action(val name: String)
 interface Resource {
+    val id: Int
     val actions: List<Action>
 }

@@ -4,11 +4,12 @@ import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.GetActivityDetails
+import org.yeffrey.cheesekake.web.WebResource
 
 class GetActivityDetailsPresenter(private val call: ApplicationCall) : GetActivityDetails.Presenter {
 
     override suspend fun success(activity: GetActivityDetails.Presenter.ActivityDetails) {
-        call.respond(activity)
+        call.respond(WebResource(activity, ActivitiesRoutes.hrefs(activity, call)))
     }
 
     override suspend fun accessDenied() {

@@ -4,6 +4,7 @@ import io.ktor.application.ApplicationCall
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivities
+import org.yeffrey.cheesekake.web.WebResource
 
 class QueryActivitiesPresenter(private val call: ApplicationCall) : QueryActivities.Presenter {
     override suspend fun notFound(id: Int) {
@@ -15,6 +16,9 @@ class QueryActivitiesPresenter(private val call: ApplicationCall) : QueryActivit
     }
 
     override suspend fun success(activities: List<QueryActivities.Presenter.Activity>) {
-        call.respond(activities)
+        val webResources = activities.map { activity ->
+            WebResource(activity, ActivitiesRoutes.hrefs(activity, call))
+        }
+        call.respond(webResources)
     }
 }

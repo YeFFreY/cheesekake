@@ -17,7 +17,7 @@ import org.yeffrey.cheesekake.persistence.db.Tables.*
 
 class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivitiesGateway, QueryActivityGateway, AddResourcesActivityGateway {
     override suspend fun get(id: Int): Option<ActivityDetailsProjection> = dbQuery {
-        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES)
                 .where(ACTIVITIES.ID.eq(id))
                 .fetchOne()
@@ -25,7 +25,7 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
             val resources = it.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITY_RESOURCES.QUANTITY).from(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { resource ->
                 ActivityResourceProjection(resource[ACTIVITY_RESOURCES.RESOURCE_ID], resource[ACTIVITY_RESOURCES.QUANTITY])
             }
-            ActivityDetailsProjection(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resources)
+            ActivityDetailsProjection(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], resources, emptyList(), activity[ACTIVITIES.AUTHOR_ID])
         }
     }
 

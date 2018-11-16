@@ -1,6 +1,7 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
 import arrow.core.Either
+import arrow.core.Option
 import arrow.core.flatMap
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.CommandResult
@@ -13,10 +14,10 @@ import org.yeffrey.cheesekake.domain.activities.isAuthor
 import org.yeffrey.cheesekake.domain.respect
 
 class AddResourceImpl(private val activityGateway: AddResourcesActivityGateway) : AddResource {
-    override suspend fun handle(request: AddResource.Request, presenter: AddResource.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
+    override suspend fun handle(request: AddResource.Request, presenter: AddResource.Presenter, userId: Option<Int>) = mustBeAuthenticated(userId, presenter) { theUserId ->
         if (activityGateway.exists(request.resourceId)) {
             activityGateway.getResources(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-                when (respect(userId, activity, ::isAuthor)) {
+                when (respect(theUserId, activity, ::isAuthor)) {
                     false -> presenter.accessDenied()
                     true -> process(request.toDomain(activity), presenter)
                 }

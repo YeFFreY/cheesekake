@@ -12,6 +12,7 @@ import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpMethod
 import io.ktor.jackson.jackson
+import io.ktor.locations.Locations
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.routing.route
@@ -59,6 +60,7 @@ fun Application.main() {
             }
         }
     }
+    install(Locations)
     install(DefaultHeaders)
     install(CallLogging)
     install(CORS) {

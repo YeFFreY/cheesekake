@@ -10,3 +10,6 @@ data class CheesePrincipal(val userId: Int) : Principal
 
 
 fun withPrincipalId(call: ApplicationCall): Option<Int> = Option.fromNullable(call.principal<CheesePrincipal>()?.userId)
+
+data class WebAction(val action: String, val link: String)
+data class WebResource(val data: Any, val links: List<WebAction> = emptyList())

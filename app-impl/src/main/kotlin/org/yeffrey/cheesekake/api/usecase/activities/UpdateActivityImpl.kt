@@ -1,6 +1,7 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
 import arrow.core.Either
+import arrow.core.Option
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
 import org.yeffrey.cheesekake.domain.CommandResult
 import org.yeffrey.cheesekake.domain.ValidationError
@@ -11,9 +12,9 @@ import org.yeffrey.cheesekake.domain.activities.isAuthor
 import org.yeffrey.cheesekake.domain.respect
 
 class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : UpdateActivity {
-    override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter) = mustBeAuthenticated(request, presenter) { userId ->
+    override suspend fun handle(request: UpdateActivity.Request, presenter: UpdateActivity.Presenter, userId: Option<Int>) = mustBeAuthenticated(userId, presenter) { theUserId ->
         activityGateway.getDescription(request.activityId).fold({ presenter.notFound(request.activityId) }) { activity ->
-            when (respect(userId, activity, ::isAuthor)) {
+            when (respect(theUserId, activity, ::isAuthor)) {
                 true -> process(request.toDomain(activity), presenter)
                 false -> presenter.accessDenied()
             }

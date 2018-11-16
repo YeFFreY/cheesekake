@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.api.usecase.users
 
+import arrow.core.Option
 import arrow.core.Some
 import arrow.data.*
 import arrow.instances.nonemptylist.semigroup.semigroup
@@ -12,7 +13,7 @@ import org.yeffrey.cheesekake.domain.users.entities.toPassword
 import org.yeffrey.cheesekake.domain.users.entities.toUsername
 
 class RegisterUserImpl(private val userGateway: RegisterUserGateway) : RegisterUser {
-    override suspend fun handle(request: RegisterUser.Request, presenter: RegisterUser.Presenter) {
+    override suspend fun handle(request: RegisterUser.Request, presenter: RegisterUser.Presenter, userId: Option<Int>) {
         val registration = request.toDomain()
         when (registration) {
             is Valid -> {

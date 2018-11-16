@@ -4,17 +4,17 @@
 # * 'gtrp' and 'gtr' create a GET request with or without query parameters;
 # * 'ptr' and 'ptrp' create a POST request with a simple or parameter-like body;
 # * 'mptr' and 'fptr' create a POST request to submit a form with a text or file field (multipart/form-data);
-POST http://localhost:{{port}}/api/activities
+POST http://localhost:{{port}}/api/activities/creation
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
 {
-  "title": "Baseball en folie",
-  "summary": "Jouer au baseball en criant comme des fous !"
+  "title": "foot en foliiiiiiiiiiiiie",
+  "summary": "Jouer au foot en criant comme des fous !"
 }
 
 ###
-POST http://localhost:{{port}}/api/activities
+POST http://localhost:{{port}}/api/activities/creation
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
@@ -37,7 +37,7 @@ Cookie: {{cookie_session}}
 
 ###
 
-PUT http://localhost:{{port}}/api/activities/10
+POST http://localhost:{{port}}/api/activities/11/correction
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
@@ -47,12 +47,12 @@ Cookie: {{cookie_session}}
 }
 
 ###
-GET http://localhost:{{port}}/api/activities/2
+GET http://localhost:{{port}}/api/activities/13
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
 ###
-POST http://localhost:{{port}}/api/activities/2/resources
+POST http://localhost:{{port}}/api/activities/11/resourceAddition
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
