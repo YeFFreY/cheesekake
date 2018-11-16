@@ -32,7 +32,7 @@ class Activities {
 class ActivitiesRoutes {
     companion object {
         fun hrefs(resource: Resource, call: ApplicationCall): List<WebAction> {
-            var links: MutableList<WebAction> = mutableListOf()
+            val links: MutableList<WebAction> = mutableListOf()
             resource.actions.map { action ->
 
                 links.add(WebAction("activity:self", call.application.locations.href(Activities.ActivityDetails(resource.id))))

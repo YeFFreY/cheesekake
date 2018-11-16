@@ -48,7 +48,7 @@ fun Route.users(registerUser: RegisterUser) {
                             name = "password"
                         }
                     }
-                    submitInput() {
+                    submitInput {
                         value = "Login"
                     }
                 }
