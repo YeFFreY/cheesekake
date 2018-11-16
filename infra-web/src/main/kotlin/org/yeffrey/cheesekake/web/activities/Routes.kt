@@ -28,6 +28,9 @@ class Activities {
 
     @Location("/activities/{activityId}/resourceAddition")
     data class ResourceAddition(val activityId: Int)
+
+    @Location("/activities/{activityId}/resourceRemoval")
+    data class ResourceRemoval(val activityId: Int)
 }
 class ActivitiesRoutes {
     companion object {
@@ -39,6 +42,7 @@ class ActivitiesRoutes {
                 if (action.name == "editable") {
                     links.add(WebAction("activity:details:correction", call.application.locations.href(Activities.ActivityCorrection(resource.id))))
                     links.add(WebAction("activity:resources:addition", call.application.locations.href(Activities.ResourceAddition(resource.id))))
+                    links.add(WebAction("activity:resources:removal", call.application.locations.href(Activities.ResourceRemoval(resource.id))))
                 }
             }
             return links.toList()
@@ -48,7 +52,7 @@ class ActivitiesRoutes {
 }
 
 
-fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, getActivityDetails: GetActivityDetails, addResource: AddResource) {
+fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActivity, queryActivities: QueryActivities, getActivityDetails: GetActivityDetails, addResource: AddResource, removeResource: RemoveResource) {
     get<Activities.ActivitiesSummary> {
         val queryTitleContains = call.request.queryParameters["titleContains"]
         queryActivities.handle(QueryActivities.Request(queryTitleContains), QueryActivitiesPresenter(call), withPrincipalId(call))
@@ -69,5 +73,9 @@ fun Route.activities(createActivity: CreateActivity, updateActivity: UpdateActiv
     post<Activities.ResourceAddition> { resourceAddition ->
         val input = call.receive<AddResourceDto>()
         addResource.handle(input.toRequest(resourceAddition.activityId), AddResourcePresenter(call), withPrincipalId(call))
+    }
+    post<Activities.ResourceRemoval> { resourceRemoval ->
+        val input = call.receive<RemoveResourceDto>()
+        removeResource.handle(input.toRequest(resourceRemoval.activityId), RemoveResourcePresenter(call), withPrincipalId(call))
     }
 }

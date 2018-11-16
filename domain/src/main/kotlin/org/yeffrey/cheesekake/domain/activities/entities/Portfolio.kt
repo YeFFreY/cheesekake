@@ -94,11 +94,11 @@ data class ActivityResourcesRequirement internal constructor(val id: Int, val re
         }
     }
 
-    fun remove(resourceId: Int): Either<ValidationError, CommandResult<ActivityResourcesRequirement, ActivityResourceRemoved>> {
+    fun remove(resourceId: Int): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceRemoved>> {
         val mutableResources = this.resources.toMutableSet()
         return when (mutableResources.removeIf { r: ActivityResource -> r.resourceId == resourceId }) {
             true -> Either.right(CommandResult(this.copy(resources = mutableResources.toSet()), ActivityResourceRemoved(this.id, resourceId)))
-            false -> Either.left(ValidationError.DuplicateActivityResource)
+            false -> Either.left(listOf(ValidationError.UnknownActivityResource))
         }
     }
 }

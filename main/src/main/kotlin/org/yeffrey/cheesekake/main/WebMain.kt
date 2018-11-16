@@ -44,6 +44,7 @@ fun Application.main() {
     val queryActivities = QueryActivitiesImpl(activityGateway)
     val getActivityDetails = GetActivityDetailsImpl(activityGateway)
     val addResource = AddResourceImpl(activityGateway)
+    val removeResource = RemoveResourceImpl(activityGateway)
     val registerUser = RegisterUserImpl(userGateway)
 
     install(Authentication) {
@@ -104,7 +105,7 @@ fun Application.main() {
         authenticate("authenticated") {
             route("/api") {
                 index()
-                activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource)
+                activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource, removeResource)
             }
         }
         users(registerUser)

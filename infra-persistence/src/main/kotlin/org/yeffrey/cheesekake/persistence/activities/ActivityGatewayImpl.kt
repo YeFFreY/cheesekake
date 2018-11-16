@@ -15,7 +15,7 @@ import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Sequences.ACTIVITIES_ID_SEQ
 import org.yeffrey.cheesekake.persistence.db.Tables.*
 
-class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivitiesGateway, QueryActivityGateway, AddResourcesActivityGateway {
+class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryActivitiesGateway, QueryActivityGateway, AddResourcesActivityGateway, RemoveResourceActivityGateway {
     override suspend fun get(id: Int): Option<ActivityDetailsProjection> = dbQuery {
         val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES)
@@ -67,16 +67,16 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
         val memento = it.select(ACTIVITY_RESOURCES.RESOURCE_ID, ACTIVITY_RESOURCES.QUANTITY)
                 .from(ACTIVITY_RESOURCES)
                 .where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(id)).fetch().map { activityResource ->
-            ActivityResource.from(activityResource[ACTIVITY_RESOURCES.RESOURCE_ID], activityResource[ACTIVITY_RESOURCES.QUANTITY]).toOption()
+                    ActivityResource.from(activityResource[ACTIVITY_RESOURCES.RESOURCE_ID], activityResource[ACTIVITY_RESOURCES.QUANTITY]).toOption()
                 }.fold(ActivityResourcesRequirementMemento(id = id, authorId = activityAuthor)) { acc, resource ->
-            when (resource) {
-                is Some -> {
-                    acc.resources.add(resource.t)
-                    acc
+                    when (resource) {
+                        is Some -> {
+                            acc.resources.add(resource.t)
+                            acc
+                        }
+                        is None -> acc
+                    }
                 }
-                is None -> acc
-            }
-        }
         ActivityResourcesRequirement.from(memento)
     }
 
@@ -85,6 +85,10 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
                 .values(data.id, data.resourceId, data.quantity)
                 .returning(ACTIVITY_RESOURCES.ACTIVITY_ID)
                 .fetchOne()[ACTIVITY_RESOURCES.ACTIVITY_ID]
+    }
+
+    override suspend fun resourceRemoved(data: ActivityResourceRemoved): Int = dbTransaction {
+        it.deleteFrom(ACTIVITY_RESOURCES).where(ACTIVITY_RESOURCES.ACTIVITY_ID.eq(data.id).and(ACTIVITY_RESOURCES.RESOURCE_ID.eq(data.resourceId))).execute()
     }
 
     override suspend fun exists(id: Int): Boolean = dbQuery {

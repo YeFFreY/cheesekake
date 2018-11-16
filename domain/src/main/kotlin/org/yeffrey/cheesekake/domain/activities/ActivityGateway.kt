@@ -1,10 +1,7 @@
 package org.yeffrey.cheesekake.domain.activities
 
 import arrow.core.Option
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityCreated
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityDetailsCorrected
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourceAdded
-import org.yeffrey.cheesekake.domain.activities.entities.ActivityResourcesRequirement
+import org.yeffrey.cheesekake.domain.activities.entities.*
 import org.yeffrey.cheesekake.domain.activities.query.ActivityDetailsProjection
 import org.yeffrey.cheesekake.domain.activities.query.ActivitySummaryProjection
 
@@ -31,5 +28,9 @@ interface AddResourcesActivityGateway {
     suspend fun getResources(id: Int): Option<ActivityResourcesRequirement>
     suspend fun exists(id: Int): Boolean
     suspend fun resourceAdded(data: ActivityResourceAdded): Int
+}
 
+interface RemoveResourceActivityGateway {
+    suspend fun getResources(id: Int): Option<ActivityResourcesRequirement>
+    suspend fun resourceRemoved(data: ActivityResourceRemoved): Int
 }

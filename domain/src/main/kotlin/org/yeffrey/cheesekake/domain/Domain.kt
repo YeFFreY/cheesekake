@@ -14,6 +14,7 @@ sealed class ValidationError(override val message: String) : ErrorDescription {
     object InvalidUsername: ValidationError("Username is invalid")
     object InvalidPassword: ValidationError("Password is invalid")
     object DuplicateActivityResource : ValidationError("Duplicate resource")
+    object UnknownActivityResource : ValidationError("Unknown resource")
     object InvalidQuantity : ValidationError("Invalid value for Quantity")
 }
 

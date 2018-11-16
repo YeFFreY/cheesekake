@@ -57,8 +57,17 @@ Content-Type: application/json
 Cookie: {{cookie_session}}
 
 {
-  "resourceId": 2,
+  "resourceId": 3,
   "quantity": 15
+}
+
+###
+POST http://localhost:{{port}}/api/activities/1/resourceRemoval
+Content-Type: application/json
+Cookie: {{cookie_session}}
+
+{
+  "resourceId": 2
 }
 
 ###
