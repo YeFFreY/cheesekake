@@ -29,7 +29,7 @@ fun <T> String.toDomainString(maxLength: Int, validationError: ValidationError, 
     }
 }
 
-fun Int.isQuantity() = this >= 0
+fun Int.isQuantity() = this > 0
 fun <T> Int.toQuantity(validationError: ValidationError, block: (s: Int) -> T): Either<ValidationError, T> {
     return when (this.isQuantity()) {
         true -> Either.right(block(this))

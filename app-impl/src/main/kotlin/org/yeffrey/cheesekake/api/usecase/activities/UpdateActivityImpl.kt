@@ -31,4 +31,4 @@ class UpdateActivityImpl(private val activityGateway: UpdateActivityGateway) : U
 
 }
 
-fun UpdateActivity.Request.toDomain(activity: ActivityDetails): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> = activity.updateActivityDetails(this.title, this.summary)
+fun UpdateActivity.Request.toDomain(activity: ActivityDetails): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> = activity.update(this.title, this.summary)

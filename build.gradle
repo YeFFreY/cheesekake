@@ -57,8 +57,8 @@ subprojects {
         compile "io.arrow-kt:arrow-instances-core:$arrow_version"
         compile "io.arrow-kt:arrow-instances-data:$arrow_version"
 
-        testCompile 'io.kotlintest:kotlintest-runner-junit5:3.1.7'
-        testCompile 'io.kotlintest:kotlintest-assertions-arrow:3.1.7'
+        testCompile 'io.kotlintest:kotlintest-runner-junit5:3.1.10'
+        testCompile 'io.kotlintest:kotlintest-assertions-arrow:3.1.10'
         testImplementation "io.mockk:mockk:1.8.11"
     }
 

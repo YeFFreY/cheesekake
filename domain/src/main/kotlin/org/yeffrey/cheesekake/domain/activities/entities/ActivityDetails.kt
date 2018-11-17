@@ -11,13 +11,15 @@ import org.yeffrey.cheesekake.domain.toDomainString
 
 data class ActivityTitle internal constructor(val value: String) {
     companion object {
-        fun from(value: String): Either<ValidationError, ActivityTitle> = value.toDomainString(250, ValidationError.InvalidActivityTitle, ::ActivityTitle)
+        const val MAX_SIZE = 250
+        fun from(value: String): Either<ValidationError, ActivityTitle> = value.toDomainString(MAX_SIZE, ValidationError.InvalidActivityTitle, ::ActivityTitle)
     }
 }
 
 data class ActivitySummary internal constructor(val value: String) {
     companion object {
-        fun from(value: String): Either<ValidationError, ActivitySummary> = value.toDomainString(250, ValidationError.InvalidActivitySummary, ::ActivitySummary)
+        const val MAX_SIZE = 2500
+        fun from(value: String): Either<ValidationError, ActivitySummary> = value.toDomainString(MAX_SIZE, ValidationError.InvalidActivitySummary, ::ActivitySummary)
     }
 }
 
@@ -47,7 +49,7 @@ data class ActivityDetails internal constructor(val id: Int, val title: Activity
 
     }
 
-    fun updateActivityDetails(title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
+    fun update(title: String, summary: String): Either<List<ValidationError>, CommandResult<ActivityDetails, ActivityDetailsCorrected>> {
         return ActivityDetails.build(title, summary) { titleValue, summaryValue ->
             this.copy(title = titleValue, summary = summaryValue)
         }.map {
