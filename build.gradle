@@ -59,7 +59,7 @@ subprojects {
 
         testCompile 'io.kotlintest:kotlintest-runner-junit5:3.1.10'
         testCompile 'io.kotlintest:kotlintest-assertions-arrow:3.1.10'
-        testImplementation "io.mockk:mockk:1.8.11"
+        testImplementation "io.mockk:mockk:1.8.13.kotlin13"
     }
 
     test {

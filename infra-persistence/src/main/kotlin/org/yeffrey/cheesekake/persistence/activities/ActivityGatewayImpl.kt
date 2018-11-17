@@ -34,20 +34,26 @@ class ActivityGatewayImpl : CreateActivityGateway, UpdateActivityGateway, QueryA
     }
 
     override suspend fun activityCreated(data: ActivityCreated): Int = dbQuery {
-        it.insertInto(ACTIVITIES, ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .values(data.id, data.title, data.summary, data.authorId)
-                .returning(ACTIVITIES.ID)
-                .fetchOne()[ACTIVITIES.ID]
+        val activity = it.newRecord(ACTIVITIES)
+        with(activity) {
+            id = data.id
+            title = data.title
+            summary = data.summary
+            authorId = data.authorId
+            store()
+        }
     }
 
     override suspend fun getDescription(id: Int): Option<ActivityDetails> = dbQuery {
-        val record = it.select(ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .from(ACTIVITIES)
-                .where(ACTIVITIES.ID.eq(id))
-                .fetchOne()
-        Option.fromNullable(record).flatMap { activity ->
-            val memento = ActivityDetailsMemento(id, activity[ACTIVITIES.TITLE], activity[ACTIVITIES.SUMMARY], activity[ACTIVITIES.AUTHOR_ID])
-            ActivityDetails.from(memento)
+        with(ACTIVITIES) {
+            val record = it.select(TITLE, SUMMARY, AUTHOR_ID)
+                    .from(ACTIVITIES)
+                    .where(ID.eq(id))
+                    .fetchOne()
+            Option.fromNullable(record).flatMap { activity ->
+                val memento = ActivityDetailsMemento(id, activity[TITLE], activity[SUMMARY], activity[AUTHOR_ID])
+                ActivityDetails.from(memento)
+            }
         }
     }
 
