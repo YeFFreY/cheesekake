@@ -5,14 +5,13 @@ import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.auth.*
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.DefaultHeaders
+import io.ktor.features.*
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.locations.Locations
+import io.ktor.response.respond
 import io.ktor.routing.Routing
 import io.ktor.routing.get
 import io.ktor.routing.route
@@ -26,6 +25,7 @@ import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.activities.ActivityGatewayImpl
 import org.yeffrey.cheesekake.persistence.users.UserGatewayImpl
+import org.yeffrey.cheesekake.web.CheeseError
 import org.yeffrey.cheesekake.web.CheeseKakeSesion
 import org.yeffrey.cheesekake.web.CheesePrincipal
 import org.yeffrey.cheesekake.web.activities.activities
@@ -60,6 +60,13 @@ fun Application.main() {
             validate {
                 this.sessions.get<CheeseKakeSesion>()?.userId?.let { userId -> CheesePrincipal(userId) }
             }
+        }
+    }
+    install(StatusPages) {
+        exception<Throwable> { cause ->
+            //TODO throw HTTP 400 when invalid request not 500...
+            call.respond(HttpStatusCode.InternalServerError, CheeseError("Unexpected error occurred"))
+            throw cause
         }
     }
     install(Locations)

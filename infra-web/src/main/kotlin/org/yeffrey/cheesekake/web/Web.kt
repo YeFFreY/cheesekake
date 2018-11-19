@@ -11,7 +11,7 @@ import org.yeffrey.core.error.ErrorDescription
 
 data class CheeseKakeSesion(val userId: Int?)
 data class CheesePrincipal(val userId: Int) : Principal
-
+data class CheeseError(val message: String)
 
 fun withPrincipalId(call: ApplicationCall): Option<Int> = Option.fromNullable(call.principal<CheesePrincipal>()?.userId)
 
