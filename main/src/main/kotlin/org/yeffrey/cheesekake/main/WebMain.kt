@@ -19,6 +19,7 @@ import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.sessions.*
+import io.ktor.util.error
 import kotlinx.html.*
 import org.yeffrey.cheesekake.api.usecase.activities.*
 import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
@@ -64,19 +65,20 @@ fun Application.main() {
     }
     install(StatusPages) {
         exception<Throwable> { cause ->
-            //TODO throw HTTP 400 when invalid request not 500...
+            environment.log.error(cause)
+            //TODO throw HTTP 400 when invalid request not 500 : DataConversionException is not thrown by ktor for primitive type conversion...
             call.respond(HttpStatusCode.InternalServerError, CheeseError("Unexpected error occurred"))
-            throw cause
         }
     }
     install(Locations)
     install(DefaultHeaders)
     install(CallLogging)
     install(CORS) {
+        anyHost()
         allowCredentials = true
         method(HttpMethod.Options)
         method(HttpMethod.Put)
-        host("*")
+
     }
     install(Sessions) {
         cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true)) {

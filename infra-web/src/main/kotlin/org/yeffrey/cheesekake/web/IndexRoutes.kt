@@ -16,6 +16,7 @@ data class Api(val version: Int, val links: List<WebAction>)
 fun Route.index() {
     get<ApiIndex> {
         call.respond(Api(1, listOf(
+                WebAction("activity:details", Activities.DETAILS),
                 WebAction("activity:creation", call.application.locations.href(Activities.ActivityCreation())),
                 WebAction("activity:list", call.application.locations.href(Activities.ActivitiesSummary()))
         )))

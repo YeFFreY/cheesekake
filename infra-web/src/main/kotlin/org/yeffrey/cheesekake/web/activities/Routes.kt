@@ -14,10 +14,15 @@ import org.yeffrey.cheesekake.web.WebAction
 import org.yeffrey.cheesekake.web.withPrincipalId
 
 class Activities {
+    companion object {
+        const val DETAILS = "/activities/{activityId}"
+    }
+
+
     @Location("/activities")
     class ActivitiesSummary
 
-    @Location("/activities/{activityId}")
+    @Location(DETAILS)
     data class ActivityDetails(val activityId: Int)
 
     @Location("/activities/creation")
@@ -38,7 +43,7 @@ class ActivitiesRoutes {
             val links: MutableList<WebAction> = mutableListOf()
             resource.actions.map { action ->
 
-                links.add(WebAction("activity:self", call.application.locations.href(Activities.ActivityDetails(resource.id))))
+                links.add(WebAction("activity:details", call.application.locations.href(Activities.ActivityDetails(resource.id))))
                 if (action.name == "editable") {
                     links.add(WebAction("activity:details:correction", call.application.locations.href(Activities.ActivityCorrection(resource.id))))
                     links.add(WebAction("activity:resources:addition", call.application.locations.href(Activities.ResourceAddition(resource.id))))
