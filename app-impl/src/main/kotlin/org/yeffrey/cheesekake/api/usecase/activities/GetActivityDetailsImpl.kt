@@ -1,7 +1,7 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
 import arrow.core.Option
-import org.yeffrey.cheesekake.api.usecase.Action
+import org.yeffrey.cheesekake.api.usecase.Resource.Action
 import org.yeffrey.cheesekake.domain.activities.QueryActivityGateway
 import org.yeffrey.cheesekake.domain.activities.query.ActivityDetailsProjection
 

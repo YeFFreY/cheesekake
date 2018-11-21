@@ -17,8 +17,9 @@ interface UseCasePresenter {
     suspend fun notFound(id: Int)
 }
 
-data class Action(val name: String)
+
 interface Resource {
+    data class Action(val name: String)
     val id: Int
     val actions: List<Action>
 }
