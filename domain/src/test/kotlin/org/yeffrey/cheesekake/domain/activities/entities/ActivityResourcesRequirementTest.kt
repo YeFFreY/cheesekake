@@ -9,6 +9,7 @@ import io.kotlintest.properties.assertAll
 import io.kotlintest.shouldBe
 import io.kotlintest.specs.StringSpec
 import org.yeffrey.cheesekake.domain.ValidationError
+import kotlin.random.Random
 
 class ActivityResourceGenerator : Gen<ActivityResource> {
     override fun constants() = emptyList<ActivityResource>()
@@ -68,7 +69,7 @@ class ActivityResourcesRequirementTest : StringSpec() {
             val original = ActivityResourcesRequirement.from(memento)
             original.fold({ fail("Activity Resource Requirements should have been rehydrated") }) { activityResourcesRequirementTest ->
                 original.map { it.resources.shouldHaveSize(1) }
-                val result = activityResourcesRequirementTest.add(ActivityResource(1, Quantity(10)))
+                val result = activityResourcesRequirementTest.add(ActivityResource(1, Quantity(Random.nextInt())))
                 result.shouldBeLeft(listOf(ValidationError.DuplicateActivityResource))
                 original.map { it.resources.shouldHaveSize(1) }
             }

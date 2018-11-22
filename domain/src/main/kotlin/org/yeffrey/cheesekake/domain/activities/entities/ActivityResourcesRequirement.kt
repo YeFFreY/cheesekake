@@ -19,6 +19,9 @@ data class ActivityResourcesRequirement internal constructor(val id: Int, val re
     }
 
     fun add(resource: ActivityResource): Either<List<ValidationError>, CommandResult<ActivityResourcesRequirement, ActivityResourceAdded>> {
+        if (this.resources.any { it.resourceId == resource.resourceId }) {
+            return Either.left(listOf(ValidationError.DuplicateActivityResource))
+        }
         val mutableResources = this.resources.toMutableSet()
         return when (mutableResources.add(resource)) {
             true -> Either.right(CommandResult(this.copy(resources = mutableResources.toSet()), ActivityResourceAdded(this.id, resource.resourceId, resource.quantity.value)))
@@ -35,7 +38,7 @@ data class ActivityResourcesRequirement internal constructor(val id: Int, val re
     }
 }
 
-data class ActivityResource constructor(val resourceId: Int, val quantity: Quantity) {
+data class ActivityResource internal constructor(val resourceId: Int, val quantity: Quantity) {
 
     companion object {
         fun from(resourceId: Int, quantity: Int): Either<List<ValidationError>, ActivityResource> {

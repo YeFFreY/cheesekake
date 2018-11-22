@@ -11,7 +11,7 @@ data class RemoveResourceDto(val resourceId: Int = -1)
 fun RemoveResourceDto.toRequest(activityId: Int): RemoveResource.Request = RemoveResource.Request(activityId, resourceId)
 
 class RemoveResourcePresenter(override val call: ApplicationCall) : RemoveResource.Presenter, WebPresenter {
-    override suspend fun success() {
-        call.respond(HttpStatusCode.OK)
+    override suspend fun success(resourceId: Int) {
+        call.respond(HttpStatusCode.OK, resourceId)
     }
 }

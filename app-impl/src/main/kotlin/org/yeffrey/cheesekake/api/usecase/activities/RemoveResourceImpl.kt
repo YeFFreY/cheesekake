@@ -26,7 +26,7 @@ class RemoveResourceImpl(private val activityGateway: RemoveResourceActivityGate
             is Either.Left -> presenter.validationFailed(result.a)
             is Either.Right -> {
                 activityGateway.resourceRemoved(result.b.event)
-                presenter.success()
+                presenter.success(result.b.event.resourceId)
             }
         }
     }
