@@ -41,9 +41,8 @@ class ActivitiesRoutes {
     companion object {
         fun hrefs(resource: Resource, call: ApplicationCall): List<WebAction> {
             val links: MutableList<WebAction> = mutableListOf()
+            links.add(WebAction("activity:details", call.application.locations.href(Activities.ActivityDetails(resource.id))))
             resource.actions.map { action ->
-
-                links.add(WebAction("activity:details", call.application.locations.href(Activities.ActivityDetails(resource.id))))
                 if (action.name == "editable") {
                     links.add(WebAction("activity:details:correction", call.application.locations.href(Activities.ActivityCorrection(resource.id))))
                     links.add(WebAction("activity:resources:addition", call.application.locations.href(Activities.ResourceAddition(resource.id))))
