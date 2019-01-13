@@ -52,13 +52,13 @@ Content-Type: application/json
 Cookie: {{cookie_session}}
 
 ###
-POST http://localhost:{{port}}/api/activities/10/resourceAddition
+POST http://localhost:{{port}}/api/activities/2/resourceAddition
 Content-Type: application/json
 Cookie: {{cookie_session}}
 
 {
-  "resourceId": 1,
-  "quantity": 70
+  "resourceId": 2,
+  "quantity": 7
 }
 
 ###

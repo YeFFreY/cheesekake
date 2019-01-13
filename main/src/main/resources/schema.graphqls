@@ -1,0 +1,44 @@
+schema {
+    query: Query
+    mutation: Mutation
+}
+
+type Query {
+    activities: [Activity]
+    activity(id: ID!): Activity
+}
+
+type Activity {
+    id: ID!
+    title: String!
+    summary: String!
+    meta: ActivityMetadata
+    skills: [Skill]
+}
+
+type Skill {
+    id: ID!
+    name: String!
+}
+
+type ActivityMetadata {
+    duration: Duration,
+    participants: Participants,
+    age: Ages
+}
+type Duration {
+    min: Int!
+    max: Int!
+}
+type Participants {
+    min: Int!
+    max: Int!
+}
+type Ages {
+    min: Int!
+    max: Int!
+}
+
+type Mutation {
+    createActivity(title: String!, summary: String): Activity
+}

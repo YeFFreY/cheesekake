@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.3.10'
+    ext.kotlin_version = '1.3.11'
     ext.kotlin_coroutines_version = '1.0.0'
 
     repositories {
@@ -18,9 +18,9 @@ buildscript {
 }
 
 ext {
-    kotlin_version = '1.3.10'
+    kotlin_version = '1.3.11'
     kotlin_coroutines_version = '1.0.0'
-    ktor_version = '1.0.0'
+    ktor_version = '1.1.1'
     jooq_version = '3.11.5'
     postgres_version = '42.2.5'
     arrow_version = '0.8.0'
@@ -77,7 +77,6 @@ project(":main") {
     mainClassName = 'io.ktor.server.netty.DevelopmentEngine'
     
     dependencies {
-        /*compile 'org.koin:koin-ktor:1.0.1'*/
         compile project(":domain")
         compile project(":app-api")
         compile project(":app-impl")
@@ -159,12 +158,13 @@ project("infra-web") {
     dependencies {
         compile project(":app-api")
 
+        compile "com.graphql-java:graphql-java:11.0"
         compile "io.ktor:ktor-server-netty:$ktor_version"
         compile "io.ktor:ktor-jackson:$ktor_version"
         compile "io.ktor:ktor-auth:$ktor_version"
         compile "io.ktor:ktor-html-builder:$ktor_version"
         compile "io.ktor:ktor-locations:$ktor_version"
         compile "io.ktor:ktor-server-sessions:$ktor_version"
-
+        compile "io.ktor:ktor-websockets:$ktor_version"
     }
 }

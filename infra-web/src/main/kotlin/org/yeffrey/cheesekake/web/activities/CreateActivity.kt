@@ -1,7 +1,6 @@
 package org.yeffrey.cheesekake.web.activities
 
 import io.ktor.application.ApplicationCall
-import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.web.WebPresenter
@@ -12,7 +11,7 @@ fun CreateActivityDto.toRequest(): CreateActivity.Request = CreateActivity.Reque
 
 class CreateActivityPresenter(override val call: ApplicationCall) : CreateActivity.Presenter, WebPresenter {
     override suspend fun success(id: Int) {
-        call.respond(HttpStatusCode.Companion.Forbidden, id)
+        call.respond(id)
     }
 
 }
