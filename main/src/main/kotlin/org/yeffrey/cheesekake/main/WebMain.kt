@@ -10,11 +10,12 @@ import graphql.schema.idl.TypeRuntimeWiring
 import io.ktor.application.Application
 import io.ktor.application.call
 import io.ktor.application.install
-import io.ktor.auth.*
-import io.ktor.features.*
+import io.ktor.features.CORS
+import io.ktor.features.CallLogging
+import io.ktor.features.ContentNegotiation
+import io.ktor.features.DefaultHeaders
 import io.ktor.html.respondHtml
 import io.ktor.http.HttpMethod
-import io.ktor.http.HttpStatusCode
 import io.ktor.jackson.jackson
 import io.ktor.locations.Locations
 import io.ktor.request.receive
@@ -26,24 +27,11 @@ import io.ktor.routing.route
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.sessions.*
-import io.ktor.util.error
-import io.ktor.websocket.WebSockets
 import kotlinx.html.*
 import org.dataloader.BatchLoader
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
-import org.yeffrey.cheesekake.api.usecase.activities.*
-import org.yeffrey.cheesekake.api.usecase.users.RegisterUserImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
-import org.yeffrey.cheesekake.persistence.activities.ActivityGatewayImpl
-import org.yeffrey.cheesekake.persistence.users.UserGatewayImpl
-import org.yeffrey.cheesekake.web.CheeseError
-import org.yeffrey.cheesekake.web.CheeseKakeSesion
-import org.yeffrey.cheesekake.web.CheesePrincipal
-import org.yeffrey.cheesekake.web.activities.activities
-import org.yeffrey.cheesekake.web.index
-import org.yeffrey.cheesekake.web.users.users
 import java.io.File
 import java.util.concurrent.CompletableFuture
 import kotlin.random.Random
@@ -148,39 +136,7 @@ fun Application.main() {
 
 
     DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
-    val activityGateway = ActivityGatewayImpl()
-    val userGateway = UserGatewayImpl()
-    val createActivity = CreateActivityImpl(activityGateway)
-    val updateActivity = UpdateActivityImpl(activityGateway)
-    val queryActivities = QueryActivitiesImpl(activityGateway)
-    val getActivityDetails = GetActivityDetailsImpl(activityGateway)
-    val addResource = AddResourceImpl(activityGateway)
-    val removeResource = RemoveResourceImpl(activityGateway)
-    val registerUser = RegisterUserImpl(userGateway)
 
-    install(WebSockets)
-    install(Authentication) {
-        form("login") {
-            validate { credentials ->
-                userGateway.login(credentials.name, credentials.password).fold({ null }) {
-                    CheesePrincipal(it)
-                }
-            }
-        }
-        session<CheeseKakeSesion>("authenticated") {
-            challenge = SessionAuthChallenge.Unauthorized
-            validate {
-                this.sessions.get<CheeseKakeSesion>()?.userId?.let { userId -> CheesePrincipal(userId) }
-            }
-        }
-    }
-    install(StatusPages) {
-        exception<Throwable> { cause ->
-            environment.log.error(cause)
-            //TODO throw HTTP 400 when invalid request not 500 : DataConversionException is not thrown by ktor for primitive type conversion...
-            call.respond(HttpStatusCode.InternalServerError, CheeseError("Unexpected error occurred"))
-        }
-    }
     install(Locations)
     install(DefaultHeaders)
     install(CallLogging)
@@ -190,11 +146,6 @@ fun Application.main() {
         method(HttpMethod.Options)
         method(HttpMethod.Put)
 
-    }
-    install(Sessions) {
-        cookie<CheeseKakeSesion>("CHEESEKAKE_SESSION_ID", directorySessionStorage(File(".sessions"), cached = true)) {
-            cookie.path = "/"
-        }
     }
     install(ContentNegotiation) {
         jackson {
@@ -240,14 +191,6 @@ fun Application.main() {
                 call.respond(executionResult.toSpecification())
             }
         }
-        authenticate("authenticated") {
-            route("/api") {
-                index()
-                activities(createActivity, updateActivity, queryActivities, getActivityDetails, addResource, removeResource)
-            }
-        }
-        users(registerUser)
-
     }
 }
 
