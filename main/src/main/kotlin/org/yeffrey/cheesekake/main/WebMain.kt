@@ -55,23 +55,55 @@ data class ActivityMetadata(val duration: MinMax?, val participants: MinMax?, va
 data class Activity(val id: Int, val title: String, val summary: String, val meta: ActivityMetadata?, val skills: List<Skill> = emptyList())
 data class GraphqlRequest(var query: String?, var operationName: String?, var variables: Map<String, Any>?)
 
+val activities = mutableListOf(
+        Activity(1, "bob", "theBob", ActivityMetadata(MinMax(5, 20), MinMax(3, 7), MinMax(3, 5))),
+        Activity(2, "bob 2", "theBob 2", null),
+        Activity(3, "bob 3", "theBob 3", ActivityMetadata(MinMax(20, 50), null, MinMax(5, 10)))
+)
+val skills = listOf(
+        listOf(
+                Skill(1, "sKill1")
+        ),
+        listOf(
+                Skill(1, "sKill1"),
+                Skill(2, "sKill2")
+        ),
+        null
+)
+
+fun TypeRuntimeWiring.Builder.route(build: TypeRuntimeWiring.Builder.() -> Unit): TypeRuntimeWiring.Builder = apply(build)
+fun TypeRuntimeWiring.Builder.activityQueries() {
+    dataFetcher("activities") { activities }
+    dataFetcher("activity") {
+        val id: Int = (it.arguments["id"] as String).toInt()
+        activities.stream().filter { it.id == id }.findFirst()
+    }
+}
+
+fun TypeRuntimeWiring.Builder.activityMutations() {
+    dataFetcher("createActivity") {
+        activities.add(Activity(Random.nextInt(), it.arguments["title"] as String, it.arguments["summary"] as String, null))
+        activities.last()
+    }
+}
+
+fun TypeRuntimeWiring.Builder.activityType() {
+    dataFetcher("skills") {
+        val dataLoader = it.getDataLoader<Int, List<Skill>>("skill")
+        dataLoader.load((it.getSource() as Activity).id)
+    }
+}
+
+fun TypeRuntimeWiring.Builder.skillQueries(): TypeRuntimeWiring.Builder {
+    dataFetcher("skills") {
+        skills.get(1)
+    }
+    return this
+}
+
 fun Application.main() {
 
-    val activities = mutableListOf(
-            Activity(1, "bob", "theBob", ActivityMetadata(MinMax(5, 20), MinMax(3, 7), MinMax(3, 5))),
-            Activity(2, "bob 2", "theBob 2", null),
-            Activity(3, "bob 3", "theBob 3", ActivityMetadata(MinMax(20, 50), null, MinMax(5, 10)))
-    )
-    val skills = listOf(
-            listOf(
-                    Skill(1, "sKill1")
-            ),
-            listOf(
-                    Skill(1, "sKill1"),
-                    Skill(2, "sKill2")
-            ),
-            null
-    )
+
     val skillsBatchLoader = BatchLoader<Int, List<Skill>> {
         println(it)
         CompletableFuture.supplyAsync {
@@ -82,6 +114,39 @@ fun Application.main() {
             res.toList()
         }
     }
+
+
+    val schemaParser = SchemaParser()
+    val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
+
+    val runtimeWiring = newRuntimeWiring()
+            .type(TypeRuntimeWiring.newTypeWiring("Query")
+                    .route {
+                        activityQueries()
+                        skillQueries()
+                    }
+            )
+            .type(TypeRuntimeWiring.newTypeWiring("Activity")
+                    .route {
+                        activityType()
+                    }
+            )
+            .type(TypeRuntimeWiring.newTypeWiring("Mutation")
+                    .route {
+                        activityMutations()
+                    }
+            )
+            .build()
+
+    val schemaGenerator = SchemaGenerator()
+    val graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring)
+
+    val graphql = GraphQL.newGraphQL(graphQLSchema).build()
+
+
+
+
+
     DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
     val activityGateway = ActivityGatewayImpl()
     val userGateway = UserGatewayImpl()
@@ -160,39 +225,7 @@ fun Application.main() {
         route("/graphql") {
             post {
 
-                val schemaParser = SchemaParser()
-                val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
-
-                val runtimeWiring = newRuntimeWiring()
-                        .type(TypeRuntimeWiring.newTypeWiring("Query")
-                                .dataFetcher("activities") {
-                                    activities
-                                }
-                                .dataFetcher("activity") {
-                                    val id: Int = it.arguments["id"] as Int
-                                    activities.stream().filter { it.id == id }.findFirst()
-                                }
-                        )
-                        .type(TypeRuntimeWiring.newTypeWiring("Activity")
-                                .dataFetcher("skills") {
-                                    val dataLoader = it.getDataLoader<Int, List<Skill>>("skill")
-                                    dataLoader.load((it.getSource() as Activity).id)
-                                }
-                        )
-                        .type(TypeRuntimeWiring.newTypeWiring("Mutation")
-                                .dataFetcher("createActivity") {
-                                    activities.add(Activity(Random.nextInt(), it.arguments["title"] as String, it.arguments["summary"] as String, null))
-                                    activities.last()
-                                }
-                        )
-                        .build()
-
-                val schemaGenerator = SchemaGenerator()
-                val graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring)
-
-                val graphql = GraphQL.newGraphQL(graphQLSchema).build()
                 val graphqlRequest = call.receive<GraphqlRequest>()
-
 
                 val skillDataLoader = DataLoader.newDataLoader(skillsBatchLoader)
                 val registry = DataLoaderRegistry()

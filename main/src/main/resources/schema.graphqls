@@ -6,6 +6,7 @@ schema {
 type Query {
     activities: [Activity]
     activity(id: ID!): Activity
+    skills: [Skill]
 }
 
 type Activity {
