@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.web.api.activities
 
+import graphql.schema.DataFetchingEnvironment
 import graphql.schema.idl.TypeRuntimeWiring
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -10,6 +11,7 @@ import org.yeffrey.cheesekake.web.WebContext
 import org.yeffrey.cheesekake.web.schema.Activity
 import org.yeffrey.cheesekake.web.schema.ActivityMetadata
 import org.yeffrey.cheesekake.web.schema.MinMax
+import java.util.concurrent.CompletableFuture
 
 
 val activities = mutableListOf(
@@ -18,14 +20,19 @@ val activities = mutableListOf(
         Activity(3, "bob 3", "theBob 3", ActivityMetadata(MinMax(20, 50), null, MinMax(5, 10)))
 )
 
+fun bob(dfe: DataFetchingEnvironment, block: suspend (presenter: GraphqlPresenter) -> Any): CompletableFuture<Any> {
+    return GlobalScope.async {
+        val presenter = GraphqlPresenter()
+        block(presenter)
+        presenter.present()
+    }.asCompletableFuture()
+}
 
 fun TypeRuntimeWiring.Builder.activityQueries(queryMyActivities: QueryMyActivities) {
     dataFetcher("activities") {
-        GlobalScope.async {
-            val presenter = GraphqlPresenter()
-            queryMyActivities.handle(WebContext(QueryMyActivities.Request()), presenter)
-            presenter.present()
-        }.asCompletableFuture()
+        bob(it) {
+            queryMyActivities.handle(context = WebContext(QueryMyActivities.Request()), presenter = it)
+        }
     }
     dataFetcher("activity") {
         val id: Int = (it.arguments["id"] as String).toInt()

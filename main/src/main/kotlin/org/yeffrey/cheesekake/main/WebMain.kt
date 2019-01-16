@@ -28,11 +28,11 @@ import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.future.await
-import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.html.*
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
+import org.yeffrey.cheesekake.persistence.ActivityGatewayImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.web.GraphqlRequest
 import org.yeffrey.cheesekake.web.api.activities.activityMutations
@@ -46,8 +46,9 @@ import java.io.File
 
 fun Application.main() {
 
+    DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
+    val activityGateway = ActivityGatewayImpl()
 
-    val compute = newFixedThreadPoolContext(4, "compute")
 
     val schemaParser = SchemaParser()
     val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
@@ -55,7 +56,7 @@ fun Application.main() {
     val runtimeWiring = newRuntimeWiring()
             .type(TypeRuntimeWiring.newTypeWiring("Query")
                     .route {
-                        activityQueries(QueryMyActivitiesImpl())
+                        activityQueries(QueryMyActivitiesImpl(activityGateway))
                         skillQueries()
                     }
             )
@@ -79,8 +80,6 @@ fun Application.main() {
 
 
 
-
-    DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
 
     install(Locations)
     install(DefaultHeaders)
