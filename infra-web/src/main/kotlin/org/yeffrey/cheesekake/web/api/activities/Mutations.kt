@@ -1,6 +1,7 @@
 package org.yeffrey.cheesekake.web.api.activities
 
 import graphql.schema.idl.TypeRuntimeWiring
+import org.yeffrey.cheesekake.web.schema.Activity
 import kotlin.random.Random
 
 

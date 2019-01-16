@@ -4,22 +4,21 @@ import arrow.core.Option
 import org.yeffrey.core.error.ErrorDescription
 
 
-interface UseCase<R : UseCaseRequest, P : UseCasePresenter> {
-    suspend fun handle(request: R, presenter: P, userId: Option<Int> = Option.empty())
+interface UseCase<R> {
+    suspend fun handle(context: UseCaseContext<R>, presenter: UseCasePresenter)
 }
 
-
-abstract class UseCaseRequest
-
-interface UseCasePresenter {
-    suspend fun validationFailed(errors: List<ErrorDescription>)
-    suspend fun accessDenied()
-    suspend fun notFound(id: Int)
+interface UseCaseContext<R> {
+    val request: R
+    val principal: Option<Principal>
 }
 
-
-interface Resource {
-    data class Action(val name: String)
+interface Principal {
     val id: Int
-    val actions: List<Action>
 }
+interface UseCasePresenter {
+    suspend fun fail(errors: List<ErrorDescription>)
+    suspend fun success(data: Any)
+}
+
+

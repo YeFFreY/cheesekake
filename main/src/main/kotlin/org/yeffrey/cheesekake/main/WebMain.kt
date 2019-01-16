@@ -27,14 +27,18 @@ import io.ktor.routing.route
 import io.ktor.server.engine.commandLineEnvironment
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
+import kotlinx.coroutines.future.await
+import kotlinx.coroutines.newFixedThreadPoolContext
 import kotlinx.html.*
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
+import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.web.GraphqlRequest
 import org.yeffrey.cheesekake.web.api.activities.activityMutations
 import org.yeffrey.cheesekake.web.api.activities.activityQueries
 import org.yeffrey.cheesekake.web.api.activities.activityType
+import org.yeffrey.cheesekake.web.api.activities.skillsByActivityLoader
 import org.yeffrey.cheesekake.web.api.skills.skillQueries
 import org.yeffrey.cheesekake.web.route
 import java.io.File
@@ -43,15 +47,15 @@ import java.io.File
 fun Application.main() {
 
 
-
+    val compute = newFixedThreadPoolContext(4, "compute")
 
     val schemaParser = SchemaParser()
     val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
-
+    val skillsByActivityLoader = skillsByActivityLoader()
     val runtimeWiring = newRuntimeWiring()
             .type(TypeRuntimeWiring.newTypeWiring("Query")
                     .route {
-                        activityQueries()
+                        activityQueries(QueryMyActivitiesImpl())
                         skillQueries()
                     }
             )
@@ -119,7 +123,7 @@ fun Application.main() {
 
                 val graphqlRequest = call.receive<GraphqlRequest>()
 
-                val skillDataLoader = DataLoader.newDataLoader(skillsByActivityBatchLoader())
+                val skillDataLoader = DataLoader.newDataLoader(skillsByActivityLoader)
                 val registry = DataLoaderRegistry()
                 registry.register("skill", skillDataLoader)
                 val executionInput = newExecutionInput()
@@ -127,8 +131,7 @@ fun Application.main() {
                         .dataLoaderRegistry(registry)
                         .operationName(graphqlRequest.operationName)
                         .variables(graphqlRequest.variables)
-
-                val executionResult = graphql.execute(executionInput.build())
+                val executionResult = graphql.executeAsync(executionInput.build()).await()
                 call.respond(executionResult.toSpecification())
             }
         }
