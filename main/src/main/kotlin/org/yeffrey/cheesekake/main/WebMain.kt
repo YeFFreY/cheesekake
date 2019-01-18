@@ -1,54 +1,39 @@
 package org.yeffrey.cheesekake.main
 
-import com.fasterxml.jackson.databind.DeserializationFeature
-import graphql.ExecutionInput.newExecutionInput
-import graphql.GraphQL
-import graphql.schema.idl.RuntimeWiring.newRuntimeWiring
-import graphql.schema.idl.SchemaGenerator
-import graphql.schema.idl.SchemaParser
-import graphql.schema.idl.TypeRuntimeWiring
-import io.ktor.application.Application
-import io.ktor.application.call
-import io.ktor.application.install
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
-import io.ktor.features.DefaultHeaders
-import io.ktor.html.respondHtml
-import io.ktor.http.HttpMethod
-import io.ktor.jackson.jackson
-import io.ktor.locations.Locations
-import io.ktor.request.receive
-import io.ktor.response.respond
-import io.ktor.routing.Routing
-import io.ktor.routing.get
-import io.ktor.routing.post
-import io.ktor.routing.route
-import io.ktor.server.engine.commandLineEnvironment
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
-import kotlinx.coroutines.future.await
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.html.*
-import org.dataloader.DataLoader
-import org.dataloader.DataLoaderRegistry
-import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
-import org.yeffrey.cheesekake.persistence.DatabaseManager
-import org.yeffrey.cheesekake.web.GraphqlRequest
-import org.yeffrey.cheesekake.web.api.activities.activityMutations
-import org.yeffrey.cheesekake.web.api.activities.activityQueries
-import org.yeffrey.cheesekake.web.api.activities.activityType
-import org.yeffrey.cheesekake.web.api.activities.skillsByActivityLoader
-import org.yeffrey.cheesekake.web.api.skills.skillQueries
-import org.yeffrey.cheesekake.web.route
-import java.io.File
+import com.natpryce.konfig.*
+import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
+import mu.KotlinLogging
+import org.http4k.server.Http4kServer
+import org.http4k.server.SunHttp
+import org.http4k.server.asServer
+import org.yeffrey.cheesekake.web.Router
 
 
-fun Application.main() {
+fun main(args: Array<String>) {
 
+    val config = systemProperties() overriding
+            ConfigurationProperties.fromResource("defaults.properties")
 
-    val compute = newFixedThreadPoolContext(4, "compute")
+    val server = startApplication(config)
+    server.block()
+}
 
+fun startApplication(config: Configuration): Http4kServer {
+    val logger = KotlinLogging.logger("main")
+
+    val serverPort = config[Key("server.port", intType)]
+
+    logger.info { "Starting server..." }
+
+    val app = Router()()
+    val server = app.asServer(SunHttp(serverPort))
+    server.start()
+
+    logger.info { "Started server on port $serverPort" }
+
+    return server
+}
+/*
     val schemaParser = SchemaParser()
     val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
     val skillsByActivityLoader = skillsByActivityLoader()
@@ -82,44 +67,6 @@ fun Application.main() {
 
     DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
 
-    install(Locations)
-    install(DefaultHeaders)
-    install(CallLogging)
-    install(CORS) {
-        anyHost()
-        allowCredentials = true
-        method(HttpMethod.Options)
-        method(HttpMethod.Put)
-
-    }
-    install(ContentNegotiation) {
-        jackson {
-            disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-        }
-    }
-    install(Routing) {
-        route("/") {
-            get {
-                call.respondHtml {
-                    head {
-                        title { +"Cheesekake" }
-                    }
-                    body {
-                        h1 {
-                            +"Welcome"
-                        }
-                        p {
-                            +"Welcome on Cheesekake"
-                        }
-                        a("/users/login") {
-                            +"Login"
-                        }
-                    }
-                }
-            }
-        }
-        route("/graphql") {
-            post {
 
                 val graphqlRequest = call.receive<GraphqlRequest>()
 
@@ -131,13 +78,6 @@ fun Application.main() {
                         .dataLoaderRegistry(registry)
                         .operationName(graphqlRequest.operationName)
                         .variables(graphqlRequest.variables)
-                val executionResult = graphql.executeAsync(executionInput.build()).await()
-                call.respond(executionResult.toSpecification())
-            }
-        }
-    }
-}
+                val executionResult = graphql.execute(executionInput.build())*/
 
-fun main(args: Array<String>) {
-    embeddedServer(Netty, commandLineEnvironment(args)).start()
-}
+
