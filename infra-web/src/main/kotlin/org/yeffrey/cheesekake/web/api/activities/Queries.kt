@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.web.api.activities
 
+import graphql.schema.DataFetchingEnvironment
 import graphql.schema.idl.TypeRuntimeWiring
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
 import org.yeffrey.cheesekake.web.GraphqlPresenter
@@ -15,14 +16,20 @@ val activities = mutableListOf(
 )
 
 
+fun kakeFetcher(dfe: DataFetchingEnvironment) = () -> Any {
+    val presenter = GraphqlPresenter()
+    //block(presenter)
+    presenter.present()
+}
+
 fun TypeRuntimeWiring.Builder.activityQueries(queryMyActivities: QueryMyActivities) {
+
     dataFetcher("activities") {
-            val presenter = GraphqlPresenter()
-        //queryMyActivities.handle(WebContext(QueryMyActivities.Request()), presenter)
-            presenter.present()
+        //queryMyActivities.handle(WebContext(QueryMyActivities.Request()), it)
     }
     dataFetcher("activity") {
         val id: Int = (it.arguments["id"] as String).toInt()
         activities.stream().filter { it.id == id }.findFirst()
+    }
     }
 }

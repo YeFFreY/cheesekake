@@ -3,10 +3,14 @@ package org.yeffrey.cheesekake.main
 import com.natpryce.konfig.*
 import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
 import mu.KotlinLogging
+import org.http4k.server.ApacheServer
 import org.http4k.server.Http4kServer
-import org.http4k.server.SunHttp
 import org.http4k.server.asServer
+import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
+import org.yeffrey.cheesekake.persistence.ActivityGatewayImpl
+import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.web.Router
+import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
 
 
 fun main(args: Array<String>) {
@@ -22,62 +26,20 @@ fun startApplication(config: Configuration): Http4kServer {
     val logger = KotlinLogging.logger("main")
 
     val serverPort = config[Key("server.port", intType)]
+    val dbUrl = config[Key("database.connectionUrl", stringType)]
 
     logger.info { "Starting server..." }
+    DatabaseManager.initialize(dbUrl)
 
-    val app = Router()()
-    val server = app.asServer(SunHttp(serverPort))
+    val queryMyActivities = QueryMyActivitiesImpl(ActivityGatewayImpl())
+
+    val graphqlHandler = GraphqlHandlerImpl(queryMyActivities)
+
+    val app = Router(graphqlHandler)()
+    val server = app.asServer(ApacheServer(serverPort))
     server.start()
 
     logger.info { "Started server on port $serverPort" }
 
     return server
 }
-/*
-    val schemaParser = SchemaParser()
-    val typeDefinitionRegistry = schemaParser.parse(File(ClassLoader.getSystemResource("schema.graphqls").file))
-    val skillsByActivityLoader = skillsByActivityLoader()
-    val runtimeWiring = newRuntimeWiring()
-            .type(TypeRuntimeWiring.newTypeWiring("Query")
-                    .route {
-                        activityQueries(QueryMyActivitiesImpl())
-                        skillQueries()
-                    }
-            )
-            .type(TypeRuntimeWiring.newTypeWiring("Activity")
-                    .route {
-                        activityType()
-                    }
-            )
-            .type(TypeRuntimeWiring.newTypeWiring("Mutation")
-                    .route {
-                        activityMutations()
-                    }
-            )
-            .build()
-
-    val schemaGenerator = SchemaGenerator()
-    val graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring)
-
-    val graphql = GraphQL.newGraphQL(graphQLSchema).build()
-
-
-
-
-
-    DatabaseManager.initialize(this.environment.config.config("database").property("connectionUrl").getString())
-
-
-                val graphqlRequest = call.receive<GraphqlRequest>()
-
-                val skillDataLoader = DataLoader.newDataLoader(skillsByActivityLoader)
-                val registry = DataLoaderRegistry()
-                registry.register("skill", skillDataLoader)
-                val executionInput = newExecutionInput()
-                        .query(graphqlRequest.query)
-                        .dataLoaderRegistry(registry)
-                        .operationName(graphqlRequest.operationName)
-                        .variables(graphqlRequest.variables)
-                val executionResult = graphql.execute(executionInput.build())*/
-
-

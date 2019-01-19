@@ -2,8 +2,6 @@ package org.yeffrey.cheesekake.persistence
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import kotlinx.coroutines.newFixedThreadPoolContext
-import kotlinx.coroutines.withContext
 import org.jooq.DSLContext
 import org.jooq.SQLDialect
 import org.jooq.impl.DSL
@@ -13,7 +11,6 @@ import kotlin.coroutines.CoroutineContext
 object DatabaseManager {
     private lateinit var dispatcher: CoroutineContext
     private lateinit var dslContext: DSLContext
-
 
 
     private fun datasource(connectionUrl: String, poolSize: Int): DataSource {
@@ -26,24 +23,20 @@ object DatabaseManager {
     }
 
 
-
     fun initialize(connectionUrl: String, poolSize: Int = 10) {
-        dispatcher = newFixedThreadPoolContext(poolSize, "database-pool")
+        //dispatcher = newFixedThreadPoolContext(poolSize, "database-pool")
         dslContext = DSL.using(datasource(connectionUrl, poolSize), SQLDialect.POSTGRES)
     }
 
-    suspend fun <T> dbQuery(block: (dslContext: DSLContext) -> T): T = withContext(dispatcher) {
-        block(dslContext)
-    }
+    fun <T> dbQuery(block: (dslContext: DSLContext) -> T): T = block(dslContext)
 
     @Suppress("UNCHECKED_CAST")
-    suspend fun <T> dbTransaction(block: (dslContext: DSLContext) -> T): T = withContext(dispatcher) {
+    fun <T> dbTransaction(block: (dslContext: DSLContext) -> T): T {
         var returnVal: T? = null
         dslContext.transaction { configuration ->
             val subContext = DSL.using(configuration)
             returnVal = block(subContext)
         }
-        returnVal as T
+        return returnVal as T
     }
 }
-

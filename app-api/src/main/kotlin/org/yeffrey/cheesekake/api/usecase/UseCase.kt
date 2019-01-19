@@ -5,7 +5,7 @@ import org.yeffrey.core.error.ErrorDescription
 
 
 interface UseCase<R> {
-    suspend fun handle(context: UseCaseContext<R>, presenter: UseCasePresenter)
+    fun handle(context: UseCaseContext<R>, presenter: UseCasePresenter)
 }
 
 interface UseCaseContext<R> {
@@ -17,8 +17,8 @@ interface Principal {
     val id: Int
 }
 interface UseCasePresenter {
-    suspend fun fail(errors: List<ErrorDescription>)
-    suspend fun success(data: Any)
+    fun fail(errors: List<ErrorDescription>)
+    fun success(data: Any)
 }
 
 

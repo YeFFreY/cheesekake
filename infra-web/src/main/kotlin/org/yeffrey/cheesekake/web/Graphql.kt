@@ -6,13 +6,13 @@ import org.yeffrey.core.error.ErrorDescription
 
 data class GraphqlRequest(var query: String?, var operationName: String?, var variables: Map<String, Any>?)
 class GraphqlPresenter : UseCasePresenter {
-    lateinit var viewModel: Any
+    private lateinit var viewModel: Any
 
-    override suspend fun fail(errors: List<ErrorDescription>) {
+    override fun fail(errors: List<ErrorDescription>) {
         viewModel = errors.stream().map(ErrorDescription::message)
     }
 
-    override suspend fun success(data: Any) {
+    override fun success(data: Any) {
         viewModel = data;
     }
 
@@ -22,4 +22,4 @@ class GraphqlPresenter : UseCasePresenter {
 
 }
 
-fun TypeRuntimeWiring.Builder.route(build: TypeRuntimeWiring.Builder.() -> Unit) = apply(build)
+fun TypeRuntimeWiring.Builder.routes(build: TypeRuntimeWiring.Builder.() -> Unit) = apply(build)

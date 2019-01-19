@@ -10,5 +10,6 @@
     </root>
 
     <logger name="org.http4k" level="INFO"/>
+    <logger name="graphql" level="INFO"/>
 
 </configuration>
