@@ -23,7 +23,6 @@ class Router(val graphqlHandler: GraphqlHandler) {
     )
 
     private fun processGraphql() = { req: Request ->
-        println("BOOOOOOOOOOOOOOOOOOOOOOOOOO")
         val newGraphqlRequest = graphqlRequestLens(req)
         val result = graphqlHandler(newGraphqlRequest)
         Response(Status.OK).with(graphqlResponseLens of result)

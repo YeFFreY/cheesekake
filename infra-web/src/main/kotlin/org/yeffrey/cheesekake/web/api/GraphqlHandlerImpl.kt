@@ -8,19 +8,28 @@ import graphql.schema.idl.SchemaParser
 import graphql.schema.idl.TypeRuntimeWiring
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
+import org.yeffrey.cheesekake.api.usecase.activities.QueryActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
+import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkills
+import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivities
 import org.yeffrey.cheesekake.web.GraphqlHandler
 import org.yeffrey.cheesekake.web.GraphqlRequest
+import org.yeffrey.cheesekake.web.api.activities.SkillsByActivityId
 import org.yeffrey.cheesekake.web.api.activities.activityMutations
 import org.yeffrey.cheesekake.web.api.activities.activityQueries
 import org.yeffrey.cheesekake.web.api.activities.activityType
-import org.yeffrey.cheesekake.web.api.activities.skillsByActivityLoader
 import org.yeffrey.cheesekake.web.api.skills.skillQueries
 import org.yeffrey.cheesekake.web.routes
 import java.io.File
 
-class GraphqlHandlerImpl(private val queryMyActivities: QueryMyActivities) : GraphqlHandler {
+class GraphqlHandlerImpl(
+        private val queryMyActivities: QueryMyActivities,
+        private val queryActivity: QueryActivity,
+        private val queryMySkills: QueryMySkills,
+        querySkillsByActivities: QuerySkillsByActivities
+) : GraphqlHandler {
     private var graphql: GraphQL
+    private var skillsByActivityId: SkillsByActivityId
 
     init {
         val schemaParser = SchemaParser()
@@ -28,8 +37,8 @@ class GraphqlHandlerImpl(private val queryMyActivities: QueryMyActivities) : Gra
         val runtimeWiring = newRuntimeWiring()
                 .type(TypeRuntimeWiring.newTypeWiring("Query")
                         .routes {
-                            activityQueries(queryMyActivities)
-                            skillQueries()
+                            activityQueries(queryMyActivities, queryActivity)
+                            skillQueries(queryMySkills)
                         }
                 )
                 .type(TypeRuntimeWiring.newTypeWiring("Activity")
@@ -46,12 +55,13 @@ class GraphqlHandlerImpl(private val queryMyActivities: QueryMyActivities) : Gra
         val schemaGenerator = SchemaGenerator()
         val graphQLSchema = schemaGenerator.makeExecutableSchema(typeDefinitionRegistry, runtimeWiring)
         graphql = GraphQL.newGraphQL(graphQLSchema).build()
+        skillsByActivityId = SkillsByActivityId(querySkillsByActivities)
     }
 
     override fun invoke(request: GraphqlRequest): MutableMap<String, Any> {
-        val skillDataLoader = DataLoader.newDataLoader(skillsByActivityLoader())
         val registry = DataLoaderRegistry()
-        registry.register("skill", skillDataLoader)
+        registry.register("skill", DataLoader.newDataLoader(skillsByActivityId))
+
         val executionInput = newExecutionInput()
                 .query(request.query)
                 .dataLoaderRegistry(registry)

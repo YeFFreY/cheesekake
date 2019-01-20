@@ -1,16 +1,13 @@
 package org.yeffrey.cheesekake.web.api.skills
 
 import graphql.schema.idl.TypeRuntimeWiring
-import org.yeffrey.cheesekake.web.schema.Skill
+import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkills
+import org.yeffrey.cheesekake.api.usecase.skills.SkillDto
+import org.yeffrey.cheesekake.web.WebContext
+import org.yeffrey.cheesekake.web.fetcherPresenter
 
-
-val skills = listOf(
-        Skill(1, "sKill1"),
-        Skill(2, "sKill2")
-)
-
-fun TypeRuntimeWiring.Builder.skillQueries() {
-    dataFetcher("skills") {
-        skills
+fun TypeRuntimeWiring.Builder.skillQueries(queryMySkills: QueryMySkills) {
+    fetcherPresenter<List<SkillDto>>("skills") { _, presenter ->
+        queryMySkills.handle(WebContext(QueryMySkills.Request()), presenter)
     }
 }

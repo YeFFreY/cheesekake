@@ -4,8 +4,8 @@ import arrow.core.Option
 import org.yeffrey.core.error.ErrorDescription
 
 
-interface UseCase<R> {
-    fun handle(context: UseCaseContext<R>, presenter: UseCasePresenter)
+interface UseCase<R, D> {
+    fun handle(context: UseCaseContext<R>, presenter: UseCasePresenter<D>)
 }
 
 interface UseCaseContext<R> {
@@ -16,9 +16,11 @@ interface UseCaseContext<R> {
 interface Principal {
     val id: Int
 }
-interface UseCasePresenter {
+
+interface UseCasePresenter<D> {
     fun fail(errors: List<ErrorDescription>)
-    fun success(data: Any)
+    fun success(data: D)
+    fun notFound(): Unit?
 }
 
 

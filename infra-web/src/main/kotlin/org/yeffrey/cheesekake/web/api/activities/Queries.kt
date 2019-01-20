@@ -1,9 +1,11 @@
 package org.yeffrey.cheesekake.web.api.activities
 
-import graphql.schema.DataFetchingEnvironment
 import graphql.schema.idl.TypeRuntimeWiring
+import org.yeffrey.cheesekake.api.usecase.activities.ActivityDto
+import org.yeffrey.cheesekake.api.usecase.activities.QueryActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
-import org.yeffrey.cheesekake.web.GraphqlPresenter
+import org.yeffrey.cheesekake.web.WebContext
+import org.yeffrey.cheesekake.web.fetcherPresenter
 import org.yeffrey.cheesekake.web.schema.Activity
 import org.yeffrey.cheesekake.web.schema.ActivityMetadata
 import org.yeffrey.cheesekake.web.schema.MinMax
@@ -16,20 +18,12 @@ val activities = mutableListOf(
 )
 
 
-fun kakeFetcher(dfe: DataFetchingEnvironment) = () -> Any {
-    val presenter = GraphqlPresenter()
-    //block(presenter)
-    presenter.present()
-}
-
-fun TypeRuntimeWiring.Builder.activityQueries(queryMyActivities: QueryMyActivities) {
-
-    dataFetcher("activities") {
-        //queryMyActivities.handle(WebContext(QueryMyActivities.Request()), it)
+fun TypeRuntimeWiring.Builder.activityQueries(queryMyActivities: QueryMyActivities, queryActivity: QueryActivity) {
+    fetcherPresenter<List<ActivityDto>>("activities") { _, presenter ->
+        queryMyActivities.handle(WebContext(QueryMyActivities.Request()), presenter)
     }
-    dataFetcher("activity") {
-        val id: Int = (it.arguments["id"] as String).toInt()
-        activities.stream().filter { it.id == id }.findFirst()
-    }
+    fetcherPresenter<ActivityDto>("activity") { dfe, presenter ->
+        val id: Int = (dfe.arguments["id"] as String).toInt()
+        queryActivity.handle(WebContext(QueryActivity.Request(id)), presenter)
     }
 }
