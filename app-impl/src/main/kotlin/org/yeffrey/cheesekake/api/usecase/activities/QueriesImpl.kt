@@ -6,7 +6,7 @@ import org.yeffrey.cheesekake.domain.activities.ActivitiesQueryGateway
 import org.yeffrey.cheesekake.domain.activities.Activity
 import org.yeffrey.cheesekake.domain.activities.ActivityQueryGateway
 
-private fun Activity.toDto(): ActivityDto = ActivityDto(this.id, this.title, this.summary)
+fun Activity.toDto(): ActivityDto = ActivityDto(this.id, this.title, this.summary)
 
 class QueryMyActivitiesImpl(private val activitiesGateway: ActivitiesQueryGateway) : QueryMyActivities {
     override fun handle(context: UseCaseContext<QueryMyActivities.Request>, presenter: UseCasePresenter<List<ActivityDto>>) {

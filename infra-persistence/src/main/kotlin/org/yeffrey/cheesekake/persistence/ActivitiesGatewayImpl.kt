@@ -4,10 +4,12 @@ import arrow.core.Option
 import org.yeffrey.cheesekake.domain.activities.ActivitiesQueryGateway
 import org.yeffrey.cheesekake.domain.activities.Activity
 import org.yeffrey.cheesekake.domain.activities.ActivityQueryGateway
+import org.yeffrey.cheesekake.domain.activities.CreateActivityGateway
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
+import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
 
-class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway {
+class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway, CreateActivityGateway {
     override fun query(id: Int): Option<Activity> = dbQuery {
         val result = it.select(ACTIVITIES.ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
                 .from(ACTIVITIES)
@@ -24,5 +26,12 @@ class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway {
                 .fetch { record ->
                     Activity(record[ACTIVITIES.ID], record[ACTIVITIES.TITLE], record[ACTIVITIES.SUMMARY])
                 }
+    }
+
+    override fun create(categoryId: Int, title: String, summary: Option<String>): Int = dbTransaction {
+        it.insertInto(ACTIVITIES, ACTIVITIES.CATEGORY_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY)
+                .values(categoryId, title, summary.orNull())
+                .returning(ACTIVITIES.ID)
+                .fetchOne()[ACTIVITIES.ID]
     }
 }

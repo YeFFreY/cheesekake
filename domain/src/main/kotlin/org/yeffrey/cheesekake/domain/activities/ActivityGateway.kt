@@ -9,3 +9,7 @@ interface ActivitiesQueryGateway {
 interface ActivityQueryGateway {
     fun query(id: Int): Option<Activity>
 }
+
+interface CreateActivityGateway {
+    fun create(categoryId: Int, title: String, summary: Option<String>): Int
+}

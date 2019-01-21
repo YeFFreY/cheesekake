@@ -8,6 +8,7 @@ import graphql.schema.idl.SchemaParser
 import graphql.schema.idl.TypeRuntimeWiring
 import org.dataloader.DataLoader
 import org.dataloader.DataLoaderRegistry
+import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkills
@@ -25,6 +26,7 @@ import java.io.File
 class GraphqlHandlerImpl(
         private val queryMyActivities: QueryMyActivities,
         private val queryActivity: QueryActivity,
+        private val createActivity: CreateActivity,
         private val queryMySkills: QueryMySkills,
         querySkillsByActivities: QuerySkillsByActivities
 ) : GraphqlHandler {
@@ -48,7 +50,7 @@ class GraphqlHandlerImpl(
                 )
                 .type(TypeRuntimeWiring.newTypeWiring("Mutation")
                         .routes {
-                            activityMutations()
+                            activityMutations(createActivity)
                         }
                 )
                 .build()
