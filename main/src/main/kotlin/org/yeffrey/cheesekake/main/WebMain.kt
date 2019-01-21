@@ -8,6 +8,7 @@ import org.http4k.core.*
 import org.http4k.core.cookie.Cookie
 import org.http4k.core.cookie.cookie
 import org.http4k.filter.ServerFilters
+import org.http4k.lens.RequestContextKey
 import org.http4k.server.ApacheServer
 import org.http4k.server.Http4kServer
 import org.http4k.server.asServer
@@ -20,7 +21,10 @@ import org.yeffrey.cheesekake.persistence.ActivitiesGatewayImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.SkillGatewayImpl
 import org.yeffrey.cheesekake.web.Router
+import org.yeffrey.cheesekake.web.Session
 import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
+import org.yeffrey.cheesekake.web.core.InMemorySessionProvider
+import org.yeffrey.cheesekake.web.core.SessionFilter
 import java.util.*
 
 
@@ -33,6 +37,7 @@ fun main(args: Array<String>) {
     server.block()
 }
 
+
 fun startApplication(config: Configuration): Http4kServer {
     val logger = KotlinLogging.logger("main")
 
@@ -41,6 +46,8 @@ fun startApplication(config: Configuration): Http4kServer {
 
     logger.info { "Starting server..." }
     val contexts = RequestContexts()
+
+    val sessionKey = RequestContextKey.required<Session>(contexts)
 
     DatabaseManager.initialize(dbUrl)
 
@@ -66,9 +73,13 @@ fun startApplication(config: Configuration): Http4kServer {
 
         }
     }
+
+    val sess = SessionFilter(sessionKey, InMemorySessionProvider()) {
+        Session(Option.empty())
+    }
     val app = ServerFilters.InitialiseRequestContext(contexts)
-            .then(sessionFilter)
-            .then(Router(graphqlHandler)())
+            .then(sess)
+            .then(Router(graphqlHandler, sessionKey)())
 
 
     val server = app.asServer(ApacheServer(serverPort))
