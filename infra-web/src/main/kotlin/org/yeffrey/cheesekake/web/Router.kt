@@ -28,6 +28,7 @@ class Router(val graphqlHandler: GraphqlHandler, val key: RequestContextLens<Ses
 
     private fun processGraphql() = { req: Request ->
         val request = req.with(key of (key(req).copy(principal = Option.just(109))))
+
         val newGraphqlRequest = graphqlRequestLens(request)
         val result = graphqlHandler(newGraphqlRequest)
         Response(Status.OK).with(graphqlResponseLens of result)
