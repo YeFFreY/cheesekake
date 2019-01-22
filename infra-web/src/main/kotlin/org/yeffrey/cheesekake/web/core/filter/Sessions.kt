@@ -4,6 +4,7 @@ import arrow.core.None
 import arrow.core.Option
 import arrow.core.Some
 import arrow.core.getOrElse
+import mu.KotlinLogging
 import org.http4k.core.Filter
 import org.http4k.core.Response
 import org.http4k.core.Status
@@ -17,12 +18,13 @@ interface AuthenticationSession {
     fun isAuthenticated(): Boolean
 }
 
+
 interface SessionProvider<T> {
     fun retrieve(key: String): Option<T>
     fun store(key: String, session: T)
 }
 
-data class Session(val principal: Option<Int> = Option.empty()) : AuthenticationSession {
+data class Session(private val principal: Option<Int> = Option.empty()) : AuthenticationSession {
     override fun isAuthenticated(): Boolean {
         return principal.isDefined()
     }
@@ -43,6 +45,8 @@ class InMemorySessionProvider<T> : SessionProvider<T> {
 }
 
 object Sessions {
+    private val logger = KotlinLogging.logger {}
+
     object UseSessions {
         operator fun <T> invoke(cookieName: String, key: RequestContextLens<T>, sessionProvider: SessionProvider<T>, sessionBuilder: () -> T) = Filter { next ->
             { request ->
@@ -65,6 +69,14 @@ object Sessions {
         }
     }
 
+    object FakePrincipal {
+        operator fun invoke(key: RequestContextLens<Session>, principalId: Int) = Filter { next ->
+            { req ->
+                val request = req.with(key of (key(req).copy(principal = Option.just(principalId))))
+                next(request)
+            }
+        }
+    }
     object Authenticated {
         operator fun <T : AuthenticationSession> invoke(key: RequestContextLens<T>) = Filter { next ->
             { request ->
@@ -72,6 +84,7 @@ object Sessions {
                 if (session.isAuthenticated()) {
                     next(request)
                 } else {
+                    logger.error("User is NOT authenticated")
                     Response(Status.UNAUTHORIZED)
                 }
 

@@ -60,6 +60,7 @@ fun startApplication(config: Configuration): Http4kServer {
 
     val app = ServerFilters.InitialiseRequestContext(contexts)
             .then(Sessions.UseSessions("CK_SESSION", sessionKey, InMemorySessionProvider()) { Session() })
+            .then(Sessions.FakePrincipal(sessionKey, 1))
             .then(Router(graphqlHandler, sessionKey)())
 
 
