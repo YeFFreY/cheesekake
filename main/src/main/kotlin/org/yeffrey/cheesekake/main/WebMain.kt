@@ -1,6 +1,5 @@
 package org.yeffrey.cheesekake.main
 
-import arrow.core.Option
 import com.natpryce.konfig.*
 import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
 import mu.KotlinLogging
@@ -20,11 +19,10 @@ import org.yeffrey.cheesekake.persistence.ActivitiesGatewayImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.SkillGatewayImpl
 import org.yeffrey.cheesekake.web.Router
-import org.yeffrey.cheesekake.web.Session
 import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
-import org.yeffrey.cheesekake.web.core.filter.AuthenticationFilter
 import org.yeffrey.cheesekake.web.core.filter.InMemorySessionProvider
-import org.yeffrey.cheesekake.web.core.filter.SessionFilter
+import org.yeffrey.cheesekake.web.core.filter.Session
+import org.yeffrey.cheesekake.web.core.filter.Sessions
 
 
 fun main(args: Array<String>) {
@@ -60,12 +58,8 @@ fun startApplication(config: Configuration): Http4kServer {
 
     val graphqlHandler = GraphqlHandlerImpl(queryMyActivities, queryActivity, createActivity, queryMySkills, querySkillsByActivities)
 
-    val sess = SessionFilter("CK_SESSION", sessionKey, InMemorySessionProvider()) {
-        Session(Option.empty())
-    }
     val app = ServerFilters.InitialiseRequestContext(contexts)
-            .then(sess)
-            .then(AuthenticationFilter.Authenticated<Session>()(sessionKey))
+            .then(Sessions.UseSessions("CK_SESSION", sessionKey, InMemorySessionProvider()) { Session() })
             .then(Router(graphqlHandler, sessionKey)())
 
 
