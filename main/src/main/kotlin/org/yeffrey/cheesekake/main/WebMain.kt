@@ -15,11 +15,14 @@ import org.yeffrey.cheesekake.api.usecase.activities.QueryActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkillsImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivitiesImpl
+import org.yeffrey.cheesekake.api.usecase.users.LoginUserImpl
 import org.yeffrey.cheesekake.persistence.ActivitiesGatewayImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
 import org.yeffrey.cheesekake.persistence.SkillGatewayImpl
+import org.yeffrey.cheesekake.persistence.UserGatewayImpl
 import org.yeffrey.cheesekake.web.Router
 import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
+import org.yeffrey.cheesekake.web.api.users.UsersHandlerImpl
 import org.yeffrey.cheesekake.web.core.filter.InMemorySessionProvider
 import org.yeffrey.cheesekake.web.core.filter.Session
 import org.yeffrey.cheesekake.web.core.filter.Sessions
@@ -50,6 +53,8 @@ fun startApplication(config: Configuration): Http4kServer {
 
     val skillGateway = SkillGatewayImpl()
     val activitiesGateway = ActivitiesGatewayImpl()
+    val userGateway = UserGatewayImpl()
+    val loginUser = LoginUserImpl(userGateway)
     val queryMyActivities = QueryMyActivitiesImpl(activitiesGateway)
     val queryActivity = QueryActivityImpl(activitiesGateway)
     val createActivity = CreateActivityImpl(activitiesGateway, activitiesGateway)
@@ -57,11 +62,12 @@ fun startApplication(config: Configuration): Http4kServer {
     val querySkillsByActivities = QuerySkillsByActivitiesImpl(skillGateway)
 
     val graphqlHandler = GraphqlHandlerImpl(queryMyActivities, queryActivity, createActivity, queryMySkills, querySkillsByActivities)
+    val userHandler = UsersHandlerImpl(loginUser)
 
     val app = ServerFilters.InitialiseRequestContext(contexts)
             .then(Sessions.UseSessions("CK_SESSION", sessionKey, InMemorySessionProvider()) { Session() })
             .then(Sessions.FakePrincipal(sessionKey, 1))
-            .then(Router(graphqlHandler, sessionKey)())
+            .then(Router(graphqlHandler, userHandler, sessionKey)())
 
 
     val server = app.asServer(ApacheServer(serverPort))

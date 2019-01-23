@@ -7,6 +7,7 @@ import org.http4k.lens.RequestContextLens
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
+import org.yeffrey.cheesekake.web.api.users.UsersHandlerImpl
 import org.yeffrey.cheesekake.web.core.filter.Session
 import org.yeffrey.cheesekake.web.core.filter.Sessions
 
@@ -15,27 +16,22 @@ interface GraphqlHandler {
 }
 
 
-class Router(val graphqlHandler: GraphqlHandler, val key: RequestContextLens<Session>) {
+class Router(val graphqlHandler: GraphqlHandler, val userHandler: UsersHandlerImpl, val key: RequestContextLens<Session>) {
 
     private val graphqlRequestLens = Body.auto<GraphqlRequest>().toLens()
     private val graphqlResponseLens = Body.auto<MutableMap<String, Any>>().toLens()
 
     private val authenticatedRoutes = Sessions.Authenticated(key).then(
             routes(
-                    "/graphql" bind Method.POST to processGraphql(),
-                    "/" bind Method.GET to { Response(Status.OK).body("API root") }
+                    "/graphql" bind Method.POST to processGraphql()
             )
     )
 
-    private val sessionRoutes = routes(
-            "/session" bind Method.GET to { Response(Status.OK).body("GET Login page") },
-            "/session" bind Method.POST to { Response(Status.OK).body("POST Login page") }
-    )
-
     operator fun invoke(): RoutingHttpHandler = routes(
-            "/api" bind authenticatedRoutes,
-            "/user" bind routes(
-                    sessionRoutes
+            "/api" bind routes(
+                    "/" bind Method.GET to { Response(Status.OK).body("API root") },
+                    authenticatedRoutes,
+                    userHandler()
             )
     )
 

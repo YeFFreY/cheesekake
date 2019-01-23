@@ -44,7 +44,7 @@ class ItemByLoaderPresenter : UseCasePresenter<Map<Int, List<SkillDto>>> {
         return viewmodel.toList()
     }
 
-    override fun notFound(): Unit? {
+    override fun notFound() {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

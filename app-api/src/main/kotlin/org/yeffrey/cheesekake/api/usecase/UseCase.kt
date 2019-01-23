@@ -20,7 +20,7 @@ interface Principal {
 interface UseCasePresenter<D> {
     fun fail(errors: List<ErrorDescription>)
     fun success(data: D)
-    fun notFound(): Unit?
+    fun notFound()
 }
 
 
