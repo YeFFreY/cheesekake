@@ -2,7 +2,9 @@ CREATE TABLE resources (
 	id serial NOT NULL,
 	name varchar NOT NULL,
 	description varchar(2500),
-	CONSTRAINT pk_resources PRIMARY KEY (id)
+	author_id integer not null,
+	CONSTRAINT pk_resources PRIMARY KEY (id),
+	CONSTRAINT fk_resources_users FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
 CREATE TABLE activity_resources (

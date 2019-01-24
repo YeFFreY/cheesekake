@@ -17,5 +17,4 @@ class CreateActivityImpl(private val activityGateway: CreateActivityGateway, pri
             is Some -> presenter.success(activity.t.toDto())
         }
     }
-
 }

@@ -42,5 +42,5 @@ type Ages {
 }
 
 type Mutation {
-    createActivity(categoryId: Int!, title: String!, summary: String): Activity
+    createActivity(categoryId: Int!, title: String!, summary: String!): Activity
 }

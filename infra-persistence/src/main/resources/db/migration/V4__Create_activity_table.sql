@@ -2,7 +2,9 @@ CREATE TABLE activity_categories (
 	id serial NOT NULL,
 	name varchar NOT NULL,
 	description varchar(2500),
-	CONSTRAINT pk_activity_categories PRIMARY KEY (id)
+	author_id integer not null,
+	CONSTRAINT pk_activity_categories PRIMARY KEY (id),
+	CONSTRAINT fk_activity_categories_users FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
 CREATE TABLE activities (

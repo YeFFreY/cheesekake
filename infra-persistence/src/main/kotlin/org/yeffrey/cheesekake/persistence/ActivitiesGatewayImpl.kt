@@ -28,9 +28,9 @@ class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway, Crea
                 }
     }
 
-    override fun create(categoryId: Int, title: String, summary: Option<String>, authorId: Int): Int = dbTransaction {
+    override fun create(categoryId: Int, title: String, summary: String, authorId: Int): Int = dbTransaction {
         it.insertInto(ACTIVITIES, ACTIVITIES.CATEGORY_ID, ACTIVITIES.TITLE, ACTIVITIES.SUMMARY, ACTIVITIES.AUTHOR_ID)
-                .values(categoryId, title, summary.orNull(), authorId)
+                .values(categoryId, title, summary, authorId)
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }

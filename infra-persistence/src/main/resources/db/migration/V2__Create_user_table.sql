@@ -11,3 +11,6 @@ CREATE TABLE credentials (
 	CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id),
 	CONSTRAINT uk_username UNIQUE (username)
 );
+
+INSERT INTO users(id) VALUES(DEFAULT);
+INSERT INTO credentials(username, password_hash, user_id) VALUES('bob', '$2a$10$DI4nvfO.9L63uXE7ZK0Uaua8SXujw3C6Cw1XFKPN4g9NFJILr21mG', 1);

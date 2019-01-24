@@ -11,5 +11,5 @@ interface ActivityQueryGateway {
 }
 
 interface CreateActivityGateway {
-    fun create(categoryId: Int, title: String, summary: Option<String>, authorId: Int): Int
+    fun create(categoryId: Int, title: String, summary: String, authorId: Int): Int
 }

@@ -10,7 +10,9 @@ CREATE TABLE skills (
 	name varchar NOT NULL,
 	description varchar(2500) NOT NULL,
 	category_id integer NOT NULL,
+	author_id integer not null,
 	CONSTRAINT fk_skills_categories FOREIGN KEY (category_id) REFERENCES skill_categories(id),
+	CONSTRAINT fk_skills_users FOREIGN KEY (author_id) REFERENCES users(id),
 	CONSTRAINT pk_skills PRIMARY KEY (id)
 );
 

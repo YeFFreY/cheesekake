@@ -18,7 +18,7 @@ import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.users.LoginUserImpl
 import org.yeffrey.cheesekake.persistence.ActivitiesGatewayImpl
 import org.yeffrey.cheesekake.persistence.DatabaseManager
-import org.yeffrey.cheesekake.persistence.SkillGatewayImpl
+import org.yeffrey.cheesekake.persistence.SkillsGatewayImpl
 import org.yeffrey.cheesekake.persistence.UserGatewayImpl
 import org.yeffrey.cheesekake.web.Router
 import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
@@ -51,7 +51,7 @@ fun startApplication(config: Configuration): Http4kServer {
 
     DatabaseManager.initialize(dbUrl)
 
-    val skillGateway = SkillGatewayImpl()
+    val skillGateway = SkillsGatewayImpl()
     val activitiesGateway = ActivitiesGatewayImpl()
     val userGateway = UserGatewayImpl()
     val loginUser = LoginUserImpl(userGateway)

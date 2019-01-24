@@ -1,13 +1,25 @@
 package org.yeffrey.cheesekake.persistence
 
+import arrow.core.Option
 import org.yeffrey.cheesekake.domain.skills.Skill
 import org.yeffrey.cheesekake.domain.skills.SkillQueryByActivitiesGateway
 import org.yeffrey.cheesekake.domain.skills.SkillQueryGateway
+import org.yeffrey.cheesekake.domain.skills.SkillsQueryGateway
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITY_SKILLS
 import org.yeffrey.cheesekake.persistence.db.Tables.SKILLS
 
-class SkillGatewayImpl : SkillQueryGateway, SkillQueryByActivitiesGateway {
+class SkillsGatewayImpl : SkillsQueryGateway, SkillQueryByActivitiesGateway, SkillQueryGateway {
+    override fun query(id: Int, authorId: Int): Option<Skill> = dbQuery { dslContext ->
+        val result = dslContext.select(SKILLS.ID, SKILLS.NAME, SKILLS.DESCRIPTION, SKILLS.AUTHOR_ID)
+                .from(SKILLS)
+                .where(SKILLS.ID.eq(id).and(SKILLS.AUTHOR_ID.eq(authorId)))
+                .fetchOne()
+        Option.fromNullable(result).map { record ->
+            Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION])
+        }
+    }
+
     override fun query(activityIds: List<Int>): Map<Int, List<Skill>> = dbQuery { dslContext ->
         val result: Map<Int, MutableList<Skill>> = activityIds.map { it to mutableListOf<Skill>() }.toMap()
 
