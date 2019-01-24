@@ -31,6 +31,10 @@ class SkillsByActivityId(private val querySkillsByActivities: QuerySkillsByActiv
 }
 
 class ItemByLoaderPresenter : UseCasePresenter<Map<Int, List<SkillDto>>> {
+    override fun accessDenied() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
     private val viewmodel: MutableList<List<SkillDto>> = mutableListOf()
     override fun success(data: Map<Int, List<SkillDto>>) {
         viewmodel.addAll(data.values.toList())

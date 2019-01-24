@@ -12,6 +12,7 @@ import org.http4k.core.cookie.Cookie
 import org.http4k.core.cookie.cookie
 import org.http4k.core.with
 import org.http4k.lens.RequestContextLens
+import org.yeffrey.cheesekake.api.usecase.Principal
 import java.util.*
 
 interface AuthenticationSession {
@@ -24,7 +25,7 @@ interface SessionProvider<T> {
     fun store(key: String, session: T)
 }
 
-data class Session(private val principal: Option<Int> = Option.empty()) : AuthenticationSession {
+data class Session(val principal: Option<Principal> = Option.empty()) : AuthenticationSession {
     override fun isAuthenticated(): Boolean {
         return principal.isDefined()
     }
@@ -72,7 +73,7 @@ object Sessions {
     object FakePrincipal {
         operator fun invoke(key: RequestContextLens<Session>, principalId: Int) = Filter { next ->
             { req ->
-                val request = req.with(key of (key(req).copy(principal = Option.just(principalId))))
+                val request = req.with(key of (key(req).copy(principal = Option.just(Principal(principalId)))))
                 next(request)
             }
         }

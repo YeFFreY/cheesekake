@@ -20,14 +20,15 @@ import org.yeffrey.cheesekake.web.api.activities.activityMutations
 import org.yeffrey.cheesekake.web.api.activities.activityQueries
 import org.yeffrey.cheesekake.web.api.activities.activityType
 import org.yeffrey.cheesekake.web.api.skills.skillQueries
+import org.yeffrey.cheesekake.web.core.filter.Session
 import org.yeffrey.cheesekake.web.routes
 import java.io.File
 
 class GraphqlHandlerImpl(
-        private val queryMyActivities: QueryMyActivities,
-        private val queryActivity: QueryActivity,
-        private val createActivity: CreateActivity,
-        private val queryMySkills: QueryMySkills,
+        queryMyActivities: QueryMyActivities,
+        queryActivity: QueryActivity,
+        createActivity: CreateActivity,
+        queryMySkills: QueryMySkills,
         querySkillsByActivities: QuerySkillsByActivities
 ) : GraphqlHandler {
     private var graphql: GraphQL
@@ -60,11 +61,12 @@ class GraphqlHandlerImpl(
         skillsByActivityId = SkillsByActivityId(querySkillsByActivities)
     }
 
-    override fun invoke(request: GraphqlRequest): MutableMap<String, Any> {
+    override fun invoke(request: GraphqlRequest, session: Session): MutableMap<String, Any> {
         val registry = DataLoaderRegistry()
         registry.register("skill", DataLoader.newDataLoader(skillsByActivityId))
 
         val executionInput = newExecutionInput()
+                .context(session)
                 .query(request.query)
                 .dataLoaderRegistry(registry)
                 .operationName(request.operationName)

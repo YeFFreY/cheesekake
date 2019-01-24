@@ -13,14 +13,13 @@ interface UseCaseContext<R> {
     val principal: Option<Principal>
 }
 
-interface Principal {
-    val id: Int
-}
+data class Principal(val id: Int)
 
 interface UseCasePresenter<D> {
     fun fail(errors: List<ErrorDescription>)
     fun success(data: D)
     fun notFound()
+    fun accessDenied()
 }
 
 

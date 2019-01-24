@@ -8,6 +8,10 @@ import org.yeffrey.core.error.ErrorDescription
 data class GraphqlRequest(var query: String?, var operationName: String?, var variables: Map<String, Any>?)
 
 class GraphqlPresenter<D> : UseCasePresenter<D> {
+    override fun accessDenied() {
+        throw AccessDeniedError()
+    }
+
     override fun notFound() {
         viewModel = null
     }
@@ -15,7 +19,7 @@ class GraphqlPresenter<D> : UseCasePresenter<D> {
     private var viewModel: Any? = null
 
     override fun fail(errors: List<ErrorDescription>) {
-        viewModel = errors.stream().map(ErrorDescription::message)
+        throw ValidationError(errors)
     }
 
     override fun success(data: D) {

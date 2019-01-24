@@ -1,5 +1,3 @@
 package org.yeffrey.core.error
 
-interface ErrorDescription {
-    val message: String
-}
+data class ErrorDescription(val field: String, val message: String)

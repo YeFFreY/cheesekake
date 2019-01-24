@@ -39,6 +39,10 @@ class UsersHandlerImpl(private val loginUser: LoginUser) {
 }
 
 class NoOpPresenter : UseCasePresenter<Unit> {
+    override fun accessDenied() {
+        viewModel = Response(Status.FORBIDDEN)
+    }
+
     private lateinit var viewModel: Response
     private val errorsLens = Body.auto<List<ErrorDescription>>().toLens()
 

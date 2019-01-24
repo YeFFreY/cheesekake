@@ -7,9 +7,9 @@ interface ActivitiesQueryGateway {
 }
 
 interface ActivityQueryGateway {
-    fun query(id: Int): Option<Activity>
+    fun query(id: Int, authorId: Int): Option<Activity>
 }
 
 interface CreateActivityGateway {
-    fun create(categoryId: Int, title: String, summary: Option<String>): Int
+    fun create(categoryId: Int, title: String, summary: Option<String>, authorId: Int): Int
 }
