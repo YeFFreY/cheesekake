@@ -7,7 +7,6 @@ import org.http4k.format.Jackson.auto
 import org.http4k.routing.RoutingHttpHandler
 import org.http4k.routing.bind
 import org.http4k.routing.routes
-import org.mindrot.jbcrypt.BCrypt
 import org.yeffrey.cheesekake.api.usecase.UseCasePresenter
 import org.yeffrey.cheesekake.api.usecase.users.LoginUser
 import org.yeffrey.cheesekake.web.WebContext
@@ -17,21 +16,18 @@ class UsersHandlerImpl(private val loginUser: LoginUser) {
     private val logger = KotlinLogging.logger {}
 
     private val sessionRoutes = routes(
-            "/session" bind Method.GET to { Response(Status.OK).body("GET Login page") },
             "/session" bind Method.POST to login()
     )
 
     operator fun invoke(): RoutingHttpHandler =
             ServerFilters.CatchLensFailure {
-                logger.info(BCrypt.hashpw("bob", BCrypt.gensalt()))
                 logger.error("Error during body parsing : ${it.failures}", it.cause)
                 Response(Status.BAD_REQUEST)
-            }
-                    .then(routes(
-                            "/users" bind routes(
-                                    sessionRoutes
-                            )
-                    ))
+            }.then(routes(
+                    "/users" bind routes(
+                            sessionRoutes
+                    )
+            ))
 
     private val loginLens = Body.auto<LoginUser.Request>().toLens()
 

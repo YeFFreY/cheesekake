@@ -11,5 +11,6 @@
 
     <logger name="org.http4k" level="INFO"/>
     <logger name="graphql" level="INFO"/>
+    <logger name="org.jooq" level="DEBUG"/>
 
 </configuration>
