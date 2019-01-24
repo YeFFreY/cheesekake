@@ -11,6 +11,7 @@ import org.dataloader.DataLoaderRegistry
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
+import org.yeffrey.cheesekake.api.usecase.skills.CreateSkill
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkills
 import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivities
 import org.yeffrey.cheesekake.web.GraphqlHandler
@@ -19,6 +20,7 @@ import org.yeffrey.cheesekake.web.api.activities.SkillsByActivityId
 import org.yeffrey.cheesekake.web.api.activities.activityMutations
 import org.yeffrey.cheesekake.web.api.activities.activityQueries
 import org.yeffrey.cheesekake.web.api.activities.activityType
+import org.yeffrey.cheesekake.web.api.skills.skillMutations
 import org.yeffrey.cheesekake.web.api.skills.skillQueries
 import org.yeffrey.cheesekake.web.core.filter.Session
 import org.yeffrey.cheesekake.web.routes
@@ -28,6 +30,7 @@ class GraphqlHandlerImpl(
         queryMyActivities: QueryMyActivities,
         queryActivity: QueryActivity,
         createActivity: CreateActivity,
+        createSkill: CreateSkill,
         queryMySkills: QueryMySkills,
         querySkillsByActivities: QuerySkillsByActivities
 ) : GraphqlHandler {
@@ -52,6 +55,7 @@ class GraphqlHandlerImpl(
                 .type(TypeRuntimeWiring.newTypeWiring("Mutation")
                         .routes {
                             activityMutations(createActivity)
+                            skillMutations(createSkill)
                         }
                 )
                 .build()

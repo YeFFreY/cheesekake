@@ -1,22 +1,28 @@
 package org.yeffrey.cheesekake.persistence
 
 import arrow.core.Option
-import org.yeffrey.cheesekake.domain.skills.Skill
-import org.yeffrey.cheesekake.domain.skills.SkillQueryByActivitiesGateway
-import org.yeffrey.cheesekake.domain.skills.SkillQueryGateway
-import org.yeffrey.cheesekake.domain.skills.SkillsQueryGateway
+import arrow.core.toOption
+import org.yeffrey.cheesekake.domain.skills.*
 import org.yeffrey.cheesekake.persistence.DatabaseManager.dbQuery
+import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITY_SKILLS
 import org.yeffrey.cheesekake.persistence.db.Tables.SKILLS
 
-class SkillsGatewayImpl : SkillsQueryGateway, SkillQueryByActivitiesGateway, SkillQueryGateway {
+class SkillsGatewayImpl : SkillsQueryGateway, SkillQueryByActivitiesGateway, SkillQueryGateway, CreateSkillGateway {
+    override fun create(categoryId: Int, name: String, description: Option<String>, authorId: Int): Int = dbTransaction {
+        it.insertInto(SKILLS, SKILLS.CATEGORY_ID, SKILLS.NAME, SKILLS.DESCRIPTION, SKILLS.AUTHOR_ID)
+                .values(categoryId, name, description.orNull(), authorId)
+                .returning(SKILLS.ID)
+                .fetchOne()[SKILLS.ID]
+    }
+
     override fun query(id: Int, authorId: Int): Option<Skill> = dbQuery { dslContext ->
         val result = dslContext.select(SKILLS.ID, SKILLS.NAME, SKILLS.DESCRIPTION, SKILLS.AUTHOR_ID)
                 .from(SKILLS)
                 .where(SKILLS.ID.eq(id).and(SKILLS.AUTHOR_ID.eq(authorId)))
                 .fetchOne()
         Option.fromNullable(result).map { record ->
-            Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION])
+            Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION].toOption())
         }
     }
 
@@ -27,7 +33,7 @@ class SkillsGatewayImpl : SkillsQueryGateway, SkillQueryByActivitiesGateway, Ski
                 .from(SKILLS.innerJoin(ACTIVITY_SKILLS).onKey())
                 .where(ACTIVITY_SKILLS.ACTIVITY_ID.`in`(activityIds))
                 .fetch { record ->
-                    result[record[ACTIVITY_SKILLS.ACTIVITY_ID]]?.add(Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION]))
+                    result[record[ACTIVITY_SKILLS.ACTIVITY_ID]]?.add(Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION].toOption()))
                 }
         result
     }
@@ -36,7 +42,7 @@ class SkillsGatewayImpl : SkillsQueryGateway, SkillQueryByActivitiesGateway, Ski
         it.select(SKILLS.ID, SKILLS.NAME, SKILLS.DESCRIPTION)
                 .from(SKILLS)
                 .fetch { record ->
-                    Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION])
+                    Skill(record[SKILLS.ID], record[SKILLS.NAME], record[SKILLS.DESCRIPTION].toOption())
                 }
     }
 }

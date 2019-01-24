@@ -8,11 +8,16 @@ type Query {
     activity(id: ID!): Activity
     skills: [Skill!]!
 }
-
+type Category {
+    id: ID!
+    name: String!
+    description: String
+}
 type Activity {
     id: ID!
     title: String!
     summary: String!
+    category: Category!
     meta: ActivityMetadata
     skills: [Skill]
 }
@@ -43,4 +48,5 @@ type Ages {
 
 type Mutation {
     createActivity(categoryId: Int!, title: String!, summary: String!): Activity
+    createSkill(categoryId: Int!, name: String!, description: String): Activity
 }

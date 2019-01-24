@@ -15,6 +15,5 @@ interface SkillQueryGateway {
 }
 
 interface CreateSkillGateway {
-    fun create(categoryId: Int, name: String, description: String, authorId: Int): Int
-
+    fun create(categoryId: Int, name: String, description: Option<String>, authorId: Int): Int
 }

@@ -13,6 +13,7 @@ import org.http4k.server.asServer
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
+import org.yeffrey.cheesekake.api.usecase.skills.CreateSkillImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkillsImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.users.LoginUserImpl
@@ -58,10 +59,11 @@ fun startApplication(config: Configuration): Http4kServer {
     val queryMyActivities = QueryMyActivitiesImpl(activitiesGateway)
     val queryActivity = QueryActivityImpl(activitiesGateway)
     val createActivity = CreateActivityImpl(activitiesGateway, activitiesGateway)
+    val createSkill = CreateSkillImpl(skillGateway, skillGateway)
     val queryMySkills = QueryMySkillsImpl(skillGateway)
     val querySkillsByActivities = QuerySkillsByActivitiesImpl(skillGateway)
 
-    val graphqlHandler = GraphqlHandlerImpl(queryMyActivities, queryActivity, createActivity, queryMySkills, querySkillsByActivities)
+    val graphqlHandler = GraphqlHandlerImpl(queryMyActivities, queryActivity, createActivity, createSkill, queryMySkills, querySkillsByActivities)
     val userHandler = UsersHandlerImpl(loginUser)
 
     val app = ServerFilters.InitialiseRequestContext(contexts)

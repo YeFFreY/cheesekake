@@ -6,7 +6,7 @@ import org.yeffrey.cheesekake.domain.skills.Skill
 import org.yeffrey.cheesekake.domain.skills.SkillQueryByActivitiesGateway
 import org.yeffrey.cheesekake.domain.skills.SkillsQueryGateway
 
-fun Skill.toDto(): SkillDto = SkillDto(this.id, this.name, this.description)
+fun Skill.toDto(): SkillDto = SkillDto(this.id, this.name, this.description.orNull())
 
 class QueryMySkillsImpl(private val skillsGateway: SkillsQueryGateway) : QueryMySkills {
     override fun handle(context: UseCaseContext<QueryMySkills.Request>, presenter: UseCasePresenter<List<SkillDto>>) {

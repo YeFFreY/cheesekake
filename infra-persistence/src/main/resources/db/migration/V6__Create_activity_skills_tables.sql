@@ -2,13 +2,15 @@ CREATE TABLE skill_categories (
 	id serial NOT NULL,
 	name varchar NOT NULL,
 	description varchar(2500),
-	CONSTRAINT pk_skill_categories PRIMARY KEY (id)
+	author_id integer not null,
+	CONSTRAINT pk_skill_categories PRIMARY KEY (id),
+	CONSTRAINT fk_skill_categories_users FOREIGN KEY (author_id) REFERENCES users(id)
 );
 
 CREATE TABLE skills (
 	id serial NOT NULL,
 	name varchar NOT NULL,
-	description varchar(2500) NOT NULL,
+	description varchar(2500),
 	category_id integer NOT NULL,
 	author_id integer not null,
 	CONSTRAINT fk_skills_categories FOREIGN KEY (category_id) REFERENCES skill_categories(id),
