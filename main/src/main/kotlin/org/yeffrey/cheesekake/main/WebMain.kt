@@ -5,6 +5,7 @@ import com.natpryce.konfig.ConfigurationProperties.Companion.systemProperties
 import mu.KotlinLogging
 import org.http4k.core.RequestContexts
 import org.http4k.core.then
+import org.http4k.filter.CorsPolicy
 import org.http4k.filter.ServerFilters
 import org.http4k.lens.RequestContextKey
 import org.http4k.server.ApacheServer
@@ -67,6 +68,7 @@ fun startApplication(config: Configuration): Http4kServer {
     val userHandler = UsersHandlerImpl(loginUser)
 
     val app = ServerFilters.InitialiseRequestContext(contexts)
+            .then(ServerFilters.Cors(CorsPolicy.UnsafeGlobalPermissive))
             .then(Sessions.UseSessions("CK_SESSION", sessionKey, InMemorySessionProvider()) { Session() })
             .then(Sessions.FakePrincipal(sessionKey, 1))
             .then(Router(graphqlHandler, userHandler, sessionKey)())
