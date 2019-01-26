@@ -8,7 +8,7 @@ import org.yeffrey.cheesekake.persistence.DatabaseManager.dbTransaction
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITIES
 import org.yeffrey.cheesekake.persistence.db.Tables.ACTIVITY_CATEGORIES
 
-class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway, CreateActivityGateway {
+class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway, CreateActivityGateway, UpdateActivityGeneralInformationGateway {
     override fun query(id: Int, authorId: Int): Option<Activity> = dbQuery {
         val result = it.select(
                 ACTIVITIES.ID,
@@ -53,4 +53,16 @@ class ActivitiesGatewayImpl : ActivitiesQueryGateway, ActivityQueryGateway, Crea
                 .returning(ACTIVITIES.ID)
                 .fetchOne()[ACTIVITIES.ID]
     }
+
+    override fun updateGeneralInformation(activityId: Int, categoryId: Int, title: String, summary: String, authorId: Int): Int = dbTransaction {
+        it.update(ACTIVITIES)
+                .set(ACTIVITIES.CATEGORY_ID, categoryId)
+                .set(ACTIVITIES.TITLE, title)
+                .set(ACTIVITIES.SUMMARY, summary)
+                .where(ACTIVITIES.ID.eq(activityId).and(ACTIVITIES.AUTHOR_ID.eq(authorId)))
+                .returning(ACTIVITIES.ID)
+                .fetchOne()[ACTIVITIES.ID]
+    }
+
+
 }

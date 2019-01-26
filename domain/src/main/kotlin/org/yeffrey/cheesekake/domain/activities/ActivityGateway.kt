@@ -13,3 +13,7 @@ interface ActivityQueryGateway {
 interface CreateActivityGateway {
     fun create(categoryId: Int, title: String, summary: String, authorId: Int): Int
 }
+
+interface UpdateActivityGeneralInformationGateway {
+    fun updateGeneralInformation(activityId: Int, categoryId: Int, title: String, summary: String, authorId: Int): Int
+}
