@@ -11,7 +11,7 @@ import org.yeffrey.cheesekake.domain.activities.UpdateActivityGeneralInformation
 
 class CreateActivityImpl(private val activityGateway: CreateActivityGateway, private val queryGateway: ActivityQueryGateway) : CreateActivity {
     override fun handle(context: UseCaseContext<CreateActivity.Request>, presenter: UseCasePresenter<ActivityDto>) = mustBeAuthenticated(context.principal, presenter) {
-        val id = activityGateway.create(context.request.categoryId, context.request.title, context.request.summary, it.id)
+        val id = activityGateway.create(context.request.categoryId, context.request.title, context.request.summaryFormatted, context.request.summaryRaw, it.id)
         val activity = queryGateway.query(id, it.id)
         when (activity) {
             is None -> presenter.notFound()
@@ -22,7 +22,7 @@ class CreateActivityImpl(private val activityGateway: CreateActivityGateway, pri
 
 class UpdateActivityGeneralInformationImpl(private val activityGateway: UpdateActivityGeneralInformationGateway, private val queryGateway: ActivityQueryGateway) : UpdateActivityGeneralInformation {
     override fun handle(context: UseCaseContext<UpdateActivityGeneralInformation.Request>, presenter: UseCasePresenter<ActivityDto>) = mustBeAuthenticated(context.principal, presenter) {
-        val id = activityGateway.updateGeneralInformation(context.request.activityId, context.request.categoryId, context.request.title, context.request.summary, it.id)
+        val id = activityGateway.updateGeneralInformation(context.request.activityId, context.request.categoryId, context.request.title, context.request.summaryFormatted, context.request.summaryRaw, it.id)
         val activity = queryGateway.query(id, it.id)
         when (activity) {
             is None -> presenter.notFound()

@@ -13,10 +13,14 @@ type Category {
     name: String!
     description: String
 }
+type FormattedText {
+    formatted: String!
+    raw: String!
+}
 type Activity {
     id: ID!
     title: String!
-    summary: String!
+    summary: FormattedText!
     category: Category!
     meta: ActivityMetadata
     skills: [Skill]
@@ -47,7 +51,7 @@ type Ages {
 }
 
 type Mutation {
-    createActivity(categoryId: Int!, title: String!, summary: String!): Activity
-    updateActivityGeneralInformation(activityId:Int!, categoryId: Int!, title: String!, summary: String!): Activity
+    createActivity(categoryId: Int!, title: String!, summaryFormatted: String!, summaryRaw: String!): Activity
+    updateActivityGeneralInformation(activityId:Int!, categoryId: Int!, title: String!, summaryFormatted: String!, summaryRaw: String!): Activity
     createSkill(categoryId: Int!, name: String!, description: String): Skill
 }

@@ -11,16 +11,18 @@ import org.yeffrey.cheesekake.web.fetcherPresenter
 private fun toCreateActivityRequest(arguments: Map<String, Any>): CreateActivity.Request {
     val categoryId = arguments["categoryId"] as Int
     val title = arguments["title"] as String
-    val summary = arguments["summary"] as String
-    return CreateActivity.Request(categoryId, title, summary)
+    val summaryFormatted = arguments["summaryFormatted"] as String
+    val summaryRaw = arguments["summaryRaw"] as String
+    return CreateActivity.Request(categoryId, title, summaryFormatted, summaryRaw)
 }
 
 private fun toUpdateActivityGeneralInformationRequest(arguments: Map<String, Any>): UpdateActivityGeneralInformation.Request {
     val activityId = arguments["activityId"] as Int
     val categoryId = arguments["categoryId"] as Int
     val title = arguments["title"] as String
-    val summary = arguments["summary"] as String
-    return UpdateActivityGeneralInformation.Request(activityId, categoryId, title, summary)
+    val summaryFormatted = arguments["summaryFormatted"] as String
+    val summaryRaw = arguments["summaryRaw"] as String
+    return UpdateActivityGeneralInformation.Request(activityId, categoryId, title, summaryFormatted, summaryRaw)
 }
 
 fun TypeRuntimeWiring.Builder.activityMutations(createActivity: CreateActivity, updateActivityGeneralInformation: UpdateActivityGeneralInformation) {

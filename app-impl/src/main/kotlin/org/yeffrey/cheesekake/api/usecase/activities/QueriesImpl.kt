@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.api.usecase.activities
 
+import org.yeffrey.cheesekake.api.usecase.FormattedTextDto
 import org.yeffrey.cheesekake.api.usecase.UseCaseContext
 import org.yeffrey.cheesekake.api.usecase.UseCasePresenter
 import org.yeffrey.cheesekake.api.usecase.mustBeAuthenticated
@@ -8,7 +9,8 @@ import org.yeffrey.cheesekake.domain.activities.Activity
 import org.yeffrey.cheesekake.domain.activities.ActivityQueryGateway
 
 fun Activity.toDto(): ActivityDto = ActivityDto(
-        this.id, this.title, this.summary,
+        this.id, this.title,
+        FormattedTextDto(this.summary.formatted, this.summary.raw),
         ActivityCategoryDto(this.category.id, this.category.name, this.category.description.orNull())
 )
 
