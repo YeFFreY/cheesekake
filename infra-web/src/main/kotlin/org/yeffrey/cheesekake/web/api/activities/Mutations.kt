@@ -1,5 +1,6 @@
 package org.yeffrey.cheesekake.web.api.activities
 
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import graphql.schema.idl.TypeRuntimeWiring
 import org.yeffrey.cheesekake.api.usecase.activities.ActivityDto
 import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
@@ -17,12 +18,8 @@ private fun toCreateActivityRequest(arguments: Map<String, Any>): CreateActivity
 }
 
 private fun toUpdateActivityGeneralInformationRequest(arguments: Map<String, Any>): UpdateActivityGeneralInformation.Request {
-    val activityId = arguments["activityId"] as Int
-    val categoryId = arguments["categoryId"] as Int
-    val title = arguments["title"] as String
-    val summaryFormatted = arguments["summaryFormatted"] as String
-    val summaryRaw = arguments["summaryRaw"] as String
-    return UpdateActivityGeneralInformation.Request(activityId, categoryId, title, summaryFormatted, summaryRaw)
+    val mapper = jacksonObjectMapper()
+    return mapper.convertValue(arguments, UpdateActivityGeneralInformation.Request::class.java)
 }
 
 fun TypeRuntimeWiring.Builder.activityMutations(createActivity: CreateActivity, updateActivityGeneralInformation: UpdateActivityGeneralInformation) {
