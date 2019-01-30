@@ -12,6 +12,7 @@ import org.yeffrey.cheesekake.api.usecase.activities.CreateActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivity
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivities
 import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivityGeneralInformation
+import org.yeffrey.cheesekake.api.usecase.activities.categories.QueryActivityCategories
 import org.yeffrey.cheesekake.api.usecase.skills.CreateSkill
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkills
 import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivities
@@ -21,6 +22,7 @@ import org.yeffrey.cheesekake.web.api.activities.SkillsByActivityId
 import org.yeffrey.cheesekake.web.api.activities.activityMutations
 import org.yeffrey.cheesekake.web.api.activities.activityQueries
 import org.yeffrey.cheesekake.web.api.activities.activityType
+import org.yeffrey.cheesekake.web.api.activities.categories.activityCategoryQueries
 import org.yeffrey.cheesekake.web.api.skills.skillMutations
 import org.yeffrey.cheesekake.web.api.skills.skillQueries
 import org.yeffrey.cheesekake.web.core.filter.Session
@@ -28,6 +30,7 @@ import org.yeffrey.cheesekake.web.routes
 import java.io.File
 
 class GraphqlHandlerImpl(
+        queryActivityCategories: QueryActivityCategories,
         queryMyActivities: QueryMyActivities,
         queryActivity: QueryActivity,
         createActivity: CreateActivity,
@@ -47,6 +50,7 @@ class GraphqlHandlerImpl(
                         .routes {
                             activityQueries(queryMyActivities, queryActivity)
                             skillQueries(queryMySkills)
+                            activityCategoryQueries(queryActivityCategories)
                         }
                 )
                 .type(TypeRuntimeWiring.newTypeWiring("Activity")

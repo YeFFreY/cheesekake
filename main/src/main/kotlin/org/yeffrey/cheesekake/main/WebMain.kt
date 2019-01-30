@@ -15,14 +15,12 @@ import org.yeffrey.cheesekake.api.usecase.activities.CreateActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryActivityImpl
 import org.yeffrey.cheesekake.api.usecase.activities.QueryMyActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.activities.UpdateActivityGeneralInformationImpl
+import org.yeffrey.cheesekake.api.usecase.activities.categories.QueryActivityCategoriesImpl
 import org.yeffrey.cheesekake.api.usecase.skills.CreateSkillImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QueryMySkillsImpl
 import org.yeffrey.cheesekake.api.usecase.skills.QuerySkillsByActivitiesImpl
 import org.yeffrey.cheesekake.api.usecase.users.LoginUserImpl
-import org.yeffrey.cheesekake.persistence.ActivitiesGatewayImpl
-import org.yeffrey.cheesekake.persistence.DatabaseManager
-import org.yeffrey.cheesekake.persistence.SkillsGatewayImpl
-import org.yeffrey.cheesekake.persistence.UserGatewayImpl
+import org.yeffrey.cheesekake.persistence.*
 import org.yeffrey.cheesekake.web.Router
 import org.yeffrey.cheesekake.web.api.GraphqlHandlerImpl
 import org.yeffrey.cheesekake.web.api.users.UsersHandlerImpl
@@ -56,8 +54,10 @@ fun startApplication(config: Configuration): Http4kServer {
 
     val skillGateway = SkillsGatewayImpl()
     val activitiesGateway = ActivitiesGatewayImpl()
+    val activityCategoriesGateway = ActivityCategoriesGatewayImpl()
     val userGateway = UserGatewayImpl()
     val loginUser = LoginUserImpl(userGateway)
+    val queryActivityCategories = QueryActivityCategoriesImpl(activityCategoriesGateway)
     val queryMyActivities = QueryMyActivitiesImpl(activitiesGateway)
     val queryActivity = QueryActivityImpl(activitiesGateway)
     val createActivity = CreateActivityImpl(activitiesGateway, activitiesGateway)
@@ -66,7 +66,7 @@ fun startApplication(config: Configuration): Http4kServer {
     val queryMySkills = QueryMySkillsImpl(skillGateway)
     val querySkillsByActivities = QuerySkillsByActivitiesImpl(skillGateway)
 
-    val graphqlHandler = GraphqlHandlerImpl(queryMyActivities, queryActivity, createActivity, updateActivityGeneralInformation, createSkill, queryMySkills, querySkillsByActivities)
+    val graphqlHandler = GraphqlHandlerImpl(queryActivityCategories, queryMyActivities, queryActivity, createActivity, updateActivityGeneralInformation, createSkill, queryMySkills, querySkillsByActivities)
     val userHandler = UsersHandlerImpl(loginUser)
 
     val app = ServerFilters.InitialiseRequestContext(contexts)

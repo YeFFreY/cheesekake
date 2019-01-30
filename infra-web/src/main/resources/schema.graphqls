@@ -7,8 +7,9 @@ type Query {
     activities: [Activity!]!
     activity(id: ID!): Activity
     skills: [Skill!]!
+    activityCategories: [ActivityCategory!]!
 }
-type Category {
+type ActivityCategory {
     id: ID!
     name: String!
     description: String
@@ -21,7 +22,7 @@ type Activity {
     id: ID!
     title: String!
     summary: FormattedText!
-    category: Category!
+    category: ActivityCategory!
     meta: ActivityMetadata
     skills: [Skill]
 }
